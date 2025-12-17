@@ -20,9 +20,12 @@ Fields can be access via the `readX()` methods on the YxdbReader class. There ar
 * `readByte()` - read Byte fields
 * `readBlob()` - read Blob and SpatialObj fields
 * `readBoolean()` - read Bool fields
-* `readDate()` - read Date and DateTime fields
-* `readDouble()` - read FixedDecimal, Float, and Double fields
+* `readDate()` - read Date fields as LocalDate
+* `readTime()` - read Time fields as LocalTime
+* `readDateTime()` - read DateTime fields as LocalDateTime
+* `readDouble()` - read Float, and Double fields
 * `readLong()` - read Int16, Int32, and Int64 fields
+* `readDecimal()` - read FixedDecimal fields as  BigDecimal
 * `readString()` - read String, WString, V_String, and V_WString fields
 
 Each read method has 2 overloads:
