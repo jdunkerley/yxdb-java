@@ -205,7 +205,7 @@ public class YxdbRecordTest {
 
     private static YxdbRecord loadRecordWithValueColumn(String type, int size) {
         var fields = new ArrayList<MetaInfoField>(1);
-        fields.add(new MetaInfoField("value", type, size, 0));
+        fields.add(new MetaInfoField("value", type, size, 0, "SOURCE", "DESCRIPTION"));
         return YxdbRecord.newFromFieldList(fields);
     }
 
