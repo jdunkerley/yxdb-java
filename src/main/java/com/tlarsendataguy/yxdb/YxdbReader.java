@@ -7,12 +7,19 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.StringReader;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static java.lang.Integer.parseInt;
@@ -155,7 +162,7 @@ public class YxdbReader {
     }
 
     /**
-     * Reads a long integer field from the .yxdb file
+     * Reads an integer field from the .yxdb file
      * @param  index the index of the field to read, starting at 0
      * @return the value of the long integer field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a long integer field
@@ -165,7 +172,7 @@ public class YxdbReader {
     }
 
     /**
-     * Reads a long integer field from the .yxdb file
+     * Reads an integer field from the .yxdb file
      * @param  name the name of the field to read
      * @return the value of the specified long integer field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a long integer field
@@ -175,7 +182,7 @@ public class YxdbReader {
     }
 
     /**
-     * Reads a numeric field from the .yxdb file
+     * Reads a floating point field from the .yxdb file
      * @param  index the index of the field to read, starting at 0
      * @return the value of the numeric field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a numeric field
@@ -185,13 +192,33 @@ public class YxdbReader {
     }
 
     /**
-     * Reads a numeric field from the .yxdb file
+     * Reads a floating point field from the .yxdb file
      * @param  name the name of the field to read
      * @return the value of the specified numeric field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a numeric field
      */
     public Double readDouble(String name) throws IllegalArgumentException {
         return record.extractDoubleFrom(name, recordReader.recordBuffer);
+    }
+
+    /**
+     * Reads a fixed decimal field from the .yxdb file
+     * @param  index the index of the field to read, starting at 0
+     * @return the value of the numeric field at the specified index. May be null.
+     * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a numeric field
+     */
+    public BigDecimal readDecimal(int index) throws IllegalArgumentException {
+        return record.extractDecimalFrom(index, recordReader.recordBuffer);
+    }
+
+    /**
+     * Reads a fixed decimal field from the .yxdb file
+     * @param  name the name of the field to read
+     * @return the value of the specified numeric field. May be null.
+     * @throws IllegalArgumentException thrown when the field does not exist or is not a numeric field
+     */
+    public BigDecimal readDecimal(String name) throws IllegalArgumentException {
+        return record.extractDecimalFrom(name, recordReader.recordBuffer);
     }
 
     /**
@@ -215,23 +242,63 @@ public class YxdbReader {
     }
 
     /**
-     * Reads a date/datetime field from the .yxdb file
+     * Reads a date field from the .yxdb file
      * @param  index the index of the field to read, starting at 0
      * @return the value of the date/datetime field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a date/datetime field
      */
-    public Date readDate(int index) throws IllegalArgumentException {
+    public LocalDate readDate(int index) throws IllegalArgumentException {
         return record.extractDateFrom(index, recordReader.recordBuffer);
     }
 
     /**
-     * Reads a date/datetime field from the .yxdb file
+     * Reads a date field from the .yxdb file
      * @param  name the name of the field to read
      * @return the value of the specified date/datetime field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a date field
      */
-    public Date readDate(String name) throws IllegalArgumentException {
+    public LocalDate readDate(String name) throws IllegalArgumentException {
         return record.extractDateFrom(name, recordReader.recordBuffer);
+    }
+
+    /**
+     * Reads a time field from the .yxdb file
+     * @param  index the index of the field to read, starting at 0
+     * @return the value of the date/datetime field at the specified index. May be null.
+     * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a date/datetime field
+     */
+    public LocalTime readTime(int index) throws IllegalArgumentException {
+        return record.extractTimeFrom(index, recordReader.recordBuffer);
+    }
+
+    /**
+     * Reads a time field from the .yxdb file
+     * @param  name the name of the field to read
+     * @return the value of the specified date/datetime field. May be null.
+     * @throws IllegalArgumentException thrown when the field does not exist or is not a date field
+     */
+    public LocalTime readTime(String name) throws IllegalArgumentException {
+        return record.extractTimeFrom(name, recordReader.recordBuffer);
+    }
+
+    /**
+     * Reads a datetime field from the .yxdb file
+     * @param  index the index of the field to read, starting at 0
+     * @return the value of the date/datetime field at the specified index. May be null.
+     * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a date/datetime field
+     */
+    public LocalDateTime readDateTime(int index) throws IllegalArgumentException {
+        return record.extractDateTimeFrom(index, recordReader.recordBuffer);
+    }
+
+    /**
+     * Reads a datetime field from the .yxdb file
+     * @param  name the name of the field to read
+     * @return the value of the specified date/datetime field. May be null.
+     * @throws IllegalArgumentException thrown when the field does not exist or is not a date field
+     */
+    public LocalDateTime readDateTime(String name) throws IllegalArgumentException {
+        return record.extractDateTimeFrom(name, recordReader.recordBuffer);
     }
 
     /**
@@ -319,6 +386,13 @@ public class YxdbReader {
     private void parseField(Node field) {
         var attributes = field.getAttributes();
         var name = attributes.getNamedItem("name");
+        var nameStr = name.getNodeValue();
+
+        var source = attributes.getNamedItem("source");
+        var sourceStr = source != null ? source.getNodeValue() : null;
+        var description = attributes.getNamedItem("description");
+        var descriptionStr = description != null ? description.getNodeValue() : null;
+
         var size = attributes.getNamedItem("size");
         var type = attributes.getNamedItem("type");
         var scale = attributes.getNamedItem("scale");
@@ -328,39 +402,39 @@ public class YxdbReader {
             return;
         }
 
-        var nameStr = name.getNodeValue();
         switch (type.getNodeValue()) {
-            case "Byte" -> fields.add(new MetaInfoField(nameStr, "Byte", 1, 0));
-            case "Bool" -> fields.add(new MetaInfoField(nameStr, "Bool", 1, 0));
-            case "Int16" -> fields.add(new MetaInfoField(nameStr, "Int16", 2, 0));
-            case "Int32" -> fields.add(new MetaInfoField(nameStr, "Int32", 4, 0));
-            case "Int64" -> fields.add(new MetaInfoField(nameStr, "Int64", 8, 0));
+            case "Byte" -> fields.add(new MetaInfoField(nameStr, "Byte", 1, 0, sourceStr, descriptionStr));
+            case "Bool" -> fields.add(new MetaInfoField(nameStr, "Bool", 1, 0, sourceStr, descriptionStr));
+            case "Int16" -> fields.add(new MetaInfoField(nameStr, "Int16", 2, 0, sourceStr, descriptionStr));
+            case "Int32" -> fields.add(new MetaInfoField(nameStr, "Int32", 4, 0, sourceStr, descriptionStr));
+            case "Int64" -> fields.add(new MetaInfoField(nameStr, "Int64", 8, 0, sourceStr, descriptionStr));
             case "FixedDecimal" -> {
                 if (scale == null || size == null) {
                     closeStreamAndThrow();
                     return;
                 }
-                fields.add(new MetaInfoField(nameStr, "FixedDecimal", parseInt(size.getNodeValue()), parseInt(scale.getNodeValue())));
+                fields.add(new MetaInfoField(nameStr, "FixedDecimal", parseInt(size.getNodeValue()), parseInt(scale.getNodeValue()), sourceStr, descriptionStr));
             }
-            case "Float" -> fields.add(new MetaInfoField(nameStr, "Float", 4, 0));
-            case "Double" -> fields.add(new MetaInfoField(nameStr, "Double", 8, 0));
+            case "Float" -> fields.add(new MetaInfoField(nameStr, "Float", 4, 0, sourceStr, descriptionStr));
+            case "Double" -> fields.add(new MetaInfoField(nameStr, "Double", 8, 0, sourceStr, descriptionStr));
             case "String" -> {
                 if (size == null) {
                     closeStreamAndThrow();
                     return;
                 }
-                fields.add(new MetaInfoField(nameStr, "String", parseInt(size.getNodeValue()), 0));
+                fields.add(new MetaInfoField(nameStr, "String", parseInt(size.getNodeValue()), 0, sourceStr, descriptionStr));
             }
             case "WString" -> {
                 if (size == null) {
                     closeStreamAndThrow();
                     return;
                 }
-                fields.add(new MetaInfoField(nameStr, "WString", parseInt(size.getNodeValue()), 0));
+                fields.add(new MetaInfoField(nameStr, "WString", parseInt(size.getNodeValue()), 0, sourceStr, descriptionStr));
             }
-            case "V_String", "V_WString", "Blob", "SpatialObj" -> fields.add(new MetaInfoField(nameStr, type.getNodeValue(), 4, 0));
-            case "Date" -> fields.add(new MetaInfoField(nameStr, "Date", 10, 0));
-            case "DateTime" -> fields.add(new MetaInfoField(nameStr, "DateTime", 19, 0));
+            case "V_String", "V_WString", "Blob", "SpatialObj" -> fields.add(new MetaInfoField(nameStr, type.getNodeValue(), 4, 0, sourceStr, descriptionStr));
+            case "Date" -> fields.add(new MetaInfoField(nameStr, "Date", 10, 0, sourceStr, descriptionStr));
+            case "Time" -> fields.add(new MetaInfoField(nameStr, "Time", 8, 0, sourceStr, descriptionStr));
+            case "DateTime" -> fields.add(new MetaInfoField(nameStr, "DateTime", 19, 0, sourceStr, descriptionStr));
             default -> closeStreamAndThrow();
         }
     }

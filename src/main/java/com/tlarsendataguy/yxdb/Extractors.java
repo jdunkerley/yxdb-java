@@ -1,153 +1,147 @@
 package com.tlarsendataguy.yxdb;
 
-
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.function.Function;
 
 class Extractors {
-    private static final DateFormat date = new SimpleDateFormat("yyyy-MM-dd");
-    private static final DateFormat dateTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    private static final DateTimeFormatter time = DateTimeFormatter.ISO_LOCAL_TIME;
+    private static final DateTimeFormatter date = DateTimeFormatter.ISO_LOCAL_DATE;
+    private static final DateTimeFormatter dateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public static Function<ByteBuffer, Boolean> NewBoolExtractor(int start) {
-        return (buffer) -> {
-            var value = buffer.get(start);
-            if (value == 2) {
-                return null;
-            }
-            return buffer.get(start) == 1;
-        };
+    static Boolean extractBoolean(ByteBuffer buffer, int start) {
+        var value = buffer.get(start);
+        if (value == 2) {
+            return null;
+        }
+        return buffer.get(start) == 1;
     }
 
-    public static Function<ByteBuffer, Byte> NewByteExtractor(int start) {
-        return (buffer) -> {
-            if (buffer.get(start+1) == 1) {
-                return null;
-            }
-            return buffer.get(start);
-        };
+    static Byte extractByte(ByteBuffer buffer, int start) {
+        if (buffer.get(start+1) == 1) {
+            return null;
+        }
+        return buffer.get(start);
     }
 
-    public static Function<ByteBuffer, Long> NewInt16Extractor(int start) {
-        return (buffer) -> {
-            if (buffer.get(start+2) == 1) {
-                return null;
-            }
-            var value = buffer.getShort(start);
-            return (long)value;
-        };
+    static Long extractInt16(ByteBuffer buffer, int start) {
+        if (buffer.get(start + 2) == 1) {
+            return null;
+        }
+        return (long)buffer.getShort(start);
     }
 
-    public static Function<ByteBuffer, Long> NewInt32Extractor(int start) {
-        return (buffer) -> {
-            if (buffer.get(start+4) == 1) {
-                return null;
-            }
-            var value = buffer.getInt(start);
-            return (long)value;
-        };
+    static Long extractInt32(ByteBuffer buffer, int start) {
+        if (buffer.get(start + 4) == 1) {
+            return null;
+        }
+        return (long)buffer.getInt(start);
     }
 
-    public static Function<ByteBuffer, Long> NewInt64Extractor(int start) {
-        return (buffer) -> {
-            if (buffer.get(start+8) == 1) {
-                return null;
-            }
-            return buffer.getLong(start);
-        };
+    static Long extractInt64(ByteBuffer buffer, int start) {
+        if (buffer.get(start + 8) == 1) {
+            return null;
+        }
+        return buffer.getLong(start);
     }
 
-    public static Function<ByteBuffer, Double> NewFixedDecimalExtractor(int start, int fieldLength) {
-        return (buffer) -> {
-            if (buffer.get(start + fieldLength) == 1){
-                return null;
-            }
-            var str = getString(buffer, start, fieldLength, 1);
-            return Double.parseDouble(str);
-        };
+    static Double extractFloat(ByteBuffer buffer, int start) {
+        if (buffer.get(start+4) == 1) {
+            return null;
+        }
+        return (double)buffer.getFloat(start);
     }
 
-    public static Function<ByteBuffer, Double> NewFloatExtractor(int start) {
-        return (buffer) -> {
-            if (buffer.get(start+4) == 1) {
-                return null;
-            }
-            return (double)buffer.getFloat(start);
-        };
+    static Double extractDouble(ByteBuffer buffer, int start) {
+        if (buffer.get(start+8) == 1) {
+            return null;
+        }
+        return buffer.getDouble(start);
     }
 
-    public static Function<ByteBuffer, Double> NewDoubleExtractor(int start) {
-        return (buffer) -> {
-            if (buffer.get(start+8) == 1) {
-                return null;
-            }
-            return (double)buffer.getDouble(start);
-        };
+    static BigDecimal extractFixedDecimal(ByteBuffer buffer, int start, int fieldLength) {
+        if (buffer.get(start + fieldLength) == 1){
+            return null;
+        }
+        var str = getString(buffer, start, fieldLength, 1);
+        return new BigDecimal(str);
     }
 
-    public static Function<ByteBuffer, Date> NewDateExtractor(int start) {
-        return (buffer) -> {
-            if (buffer.get(start+10) == 1) {
-                return null;
-            }
-            return parseDate(buffer, start, 10, date);
-        };
+    static LocalTime extractTime(ByteBuffer buffer, int start) {
+        if (buffer.get(start+8) == 1) {
+            return null;
+        }
+
+        var str = new String(buffer.array(), start, 8, StandardCharsets.ISO_8859_1);
+        try {
+            return LocalTime.parse(str, time);
+        } catch (DateTimeParseException ex) {
+            return null;
+        }
     }
 
-    public static Function<ByteBuffer, Date> NewDateTimeExtractor(int start) {
-        return (buffer) -> {
-            if (buffer.get(start+19) == 1) {
-                return null;
-            }
-            return parseDate(buffer, start, 19, dateTime);
-        };
+    static LocalDate extractDate(ByteBuffer buffer, int start) {
+        if (buffer.get(start+10) == 1) {
+            return null;
+        }
+        var str = new String(buffer.array(), start, 10, StandardCharsets.ISO_8859_1);
+        try {
+            return LocalDate.parse(str, date);
+        } catch (DateTimeParseException ex) {
+            return null;
+        }
     }
 
-    public static Function<ByteBuffer, String> NewStringExtractor(int start, int fieldLength) {
-        return (buffer) -> {
-            if (buffer.get(start+fieldLength) == 1) {
-                return null;
-            }
-            return getString(buffer, start, fieldLength, 1);
-        };
+    static LocalDateTime extractDateTime(ByteBuffer buffer, int start) {
+        if (buffer.get(start+19) == 1) {
+            return null;
+        }
+        var str = new String(buffer.array(), start, 19, StandardCharsets.ISO_8859_1);
+        try {
+            return LocalDateTime.parse(str, dateTime);
+        } catch (DateTimeParseException ex) {
+            return null;
+        }
     }
 
-    public static Function<ByteBuffer, String> NewWStringExtractor(int start, int fieldLength) {
-        return (buffer) -> {
-            if (buffer.get(start + (fieldLength*2))==1) {
-                return null;
-            }
-            return getString(buffer, start, fieldLength, 2);
-        };
+    static String extractString(ByteBuffer buffer, int start, int fieldLength) {
+        if (buffer.get(start+fieldLength) == 1) {
+            return null;
+        }
+        return getString(buffer, start, fieldLength, 1);
     }
 
-    public static Function<ByteBuffer, String> NewV_StringExtractor(int start) {
-        return (buffer) -> {
-            var bytes = parseBlob(buffer, start);
-            if (bytes == null) {
-                return null;
-            }
-            return new String(bytes, StandardCharsets.ISO_8859_1);
-        };
+    static String extractWString(ByteBuffer buffer, int start, int fieldLength) {
+        if (buffer.get(start + (fieldLength * 2)) == 1) {
+            return null;
+        }
+        return getString(buffer, start, fieldLength, 2);
     }
 
-    public static Function<ByteBuffer, String> NewV_WStringExtractor(int start) {
-        return (buffer) -> {
-            var bytes = parseBlob(buffer, start);
-            if (bytes == null) {
-                return null;
-            }
-            return new String(bytes, StandardCharsets.UTF_16LE);
-        };
+    static String extractVString(ByteBuffer buffer, int start) {
+        var bytes = parseBlob(buffer, start);
+        if (bytes == null) {
+            return null;
+        }
+        return new String(bytes, StandardCharsets.ISO_8859_1);
     }
 
-    public static Function<ByteBuffer, byte[]> NewBlobExtractor(int start) {
-        return (buffer) -> parseBlob(buffer, start);
+    static String extractVWString(ByteBuffer buffer, int start) {
+        var bytes = parseBlob(buffer, start);
+        if (bytes == null) {
+            return null;
+        }
+        return new String(bytes, StandardCharsets.UTF_16LE);
+    }
+
+    static byte[] extractBlob(ByteBuffer buffer, int start) {
+        return parseBlob(buffer, start);
     }
 
     private static byte[] parseBlob(ByteBuffer buffer, int start) {
@@ -169,15 +163,6 @@ class Extractors {
             return getSmallBlob(buffer, blockStart);
         }
         return getNormalBlob(buffer, blockStart);
-    }
-
-    private static Date parseDate(ByteBuffer buffer, int start, int length, DateFormat format) {
-        var str = new String(buffer.array(), start, length, StandardCharsets.ISO_8859_1);
-        try {
-            return format.parse(str);
-        } catch (ParseException ex) {
-            return null;
-        }
     }
 
     private static String getString(ByteBuffer buffer, int start, int fieldLength, int charSize) {
