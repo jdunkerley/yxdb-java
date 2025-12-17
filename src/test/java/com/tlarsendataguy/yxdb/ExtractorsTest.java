@@ -8,12 +8,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class ExtractorsTest {
     @FunctionalInterface
@@ -55,7 +51,7 @@ public class ExtractorsTest {
 
     @Test
     public void ExtractInt64(){
-        ExtractorFunction<Long> extract = Extractors::extractInt32;
+        ExtractorFunction<Long> extract = Extractors::extractInt64;
         Long result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,10,0,0,0,0,0,0,0, 0});
 
         Assertions.assertEquals(10, result);
@@ -63,7 +59,7 @@ public class ExtractorsTest {
 
     @Test
     public void ExtractNullInt64(){
-        ExtractorFunction<Long> extract = Extractors::extractInt32;
+        ExtractorFunction<Long> extract = Extractors::extractInt64;
         Long result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,10,0,0,0,0,0,0,0, 1});
 
         Assertions.assertNull(result);
@@ -242,8 +238,8 @@ public class ExtractorsTest {
     @Test
     public void ExtractNormalBlob() {
         // blob starts at index 6 and contains an array of 200 instances of value 66 (the character 'B')
-        var extract = Extractors.NewBlobExtractor(6);
-        byte[] result = extractFromBuffer(extract, normalBlob);
+        ExtractorFunction<byte[]> extract = Extractors::extractBlob;
+        byte[] result = extractFromBuffer(extract, 6, normalBlob);
         var expected = "B".repeat(200).getBytes(StandardCharsets.ISO_8859_1);
         Assertions.assertArrayEquals(expected, result);
     }
@@ -251,8 +247,8 @@ public class ExtractorsTest {
     @Test
     public void ExtractSmallBlob() {
         // blob starts at index 6 and contains an array of 100 instances of value 66 (the character 'B')
-        var extract = Extractors.NewBlobExtractor(6);
-        byte[] result = extractFromBuffer(extract, smallBlob);
+        ExtractorFunction<byte[]> extract = Extractors::extractBlob;
+        byte[] result = extractFromBuffer(extract, 6, smallBlob);
         var expected = "B".repeat(100).getBytes(StandardCharsets.ISO_8859_1);
         Assertions.assertArrayEquals(expected, result);
     }
@@ -260,72 +256,72 @@ public class ExtractorsTest {
     @Test
     public void ExtractTinyBlob() {
         // blob starts at index 6 and contains an array of 1 instance of value 1 (the character 'B')
-        var extract = Extractors.NewBlobExtractor(6);
+        ExtractorFunction<byte[]> extract = Extractors::extractBlob;
         var data = new byte[]{1, 0, 65, 0, 0, 32, 66, 0, 0, 16, 0, 0, 0, 0};
-        byte[] result = extractFromBuffer(extract, data);
+        byte[] result = extractFromBuffer(extract, 6, data);
         Assertions.assertArrayEquals(new byte[]{66}, result);
     }
 
     @Test
     public void ExtractEmptyBlob() {
-        var extract = Extractors.NewBlobExtractor(2);
-        byte[] result = extractFromBuffer(extract, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        ExtractorFunction<byte[]> extract = Extractors::extractBlob;
+        byte[] result = extractFromBuffer(extract, 2, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
 
         Assertions.assertArrayEquals(new byte[]{}, result);
     }
 
     @Test
     public void ExtractNullBlob() {
-        var extract = Extractors.NewBlobExtractor(2);
-        byte[] result = extractFromBuffer(extract, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        ExtractorFunction<byte[]> extract = Extractors::extractBlob;
+        byte[] result = extractFromBuffer(extract, 2, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
 
         Assertions.assertNull(result);
     }
 
     @Test
     public void ExtractV_String() {
-        var extract = Extractors.NewV_StringExtractor(6);
-        String result = extractFromBuffer(extract, smallBlob);
+        ExtractorFunction<String> extract = Extractors::extractVString;
+        String result = extractFromBuffer(extract, 6, smallBlob);
 
         Assertions.assertEquals("B".repeat(100), result);
     }
 
     @Test
     public void ExtractNullV_String() {
-        var extract = Extractors.NewV_StringExtractor(2);
-        String result = extractFromBuffer(extract, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        ExtractorFunction<String> extract = Extractors::extractVString;
+        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
 
         Assertions.assertNull(result);
     }
 
     @Test
     public void ExtractEmptyV_String() {
-        var extract = Extractors.NewV_StringExtractor(2);
-        String result = extractFromBuffer(extract, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        ExtractorFunction<String> extract = Extractors::extractVString;
+        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
 
         Assertions.assertEquals("", result);
     }
 
     @Test
     public void ExtractV_WString() {
-        var extract = Extractors.NewV_WStringExtractor(2);
-        String result = extractFromBuffer(extract, normalBlob);
+        ExtractorFunction<String> extract = Extractors::extractVWString;
+        String result = extractFromBuffer(extract, 2, normalBlob);
 
         Assertions.assertEquals("A".repeat(100), result);
     }
 
     @Test
     public void ExtractNullV_WString() {
-        var extract = Extractors.NewV_WStringExtractor(2);
-        String result = extractFromBuffer(extract, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        ExtractorFunction<String> extract = Extractors::extractVWString;
+        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
 
         Assertions.assertNull(result);
     }
 
     @Test
     public void ExtractEmptyV_WString() {
-        var extract = Extractors.NewV_WStringExtractor(2);
-        String result = extractFromBuffer(extract, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        ExtractorFunction<String> extract = Extractors::extractVWString;
+        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
 
         Assertions.assertEquals("", result);
     }

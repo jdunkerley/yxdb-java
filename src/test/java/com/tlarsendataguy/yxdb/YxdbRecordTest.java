@@ -3,10 +3,13 @@ package com.tlarsendataguy.yxdb;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 
 public class YxdbRecordTest {
@@ -73,7 +76,7 @@ public class YxdbRecordTest {
         var record = loadRecordWithValueColumn("FixedDecimal", 10);
         var source = wrap(new byte[]{49, 50, 51, 46, 52, 53, 0, 43, 67, 110, 0});
 
-        Assertions.assertEquals(123.45, record.extractDoubleFrom(0, source));
+        Assertions.assertEquals(new BigDecimal("123.45"), record.extractDecimalFrom(0, source));
         Assertions.assertEquals(11, record.fixedSize);
         Assertions.assertFalse(record.hasVar);
     }
@@ -127,7 +130,7 @@ public class YxdbRecordTest {
         var record = loadRecordWithValueColumn("Date", 10);
         var source = wrap(new byte[]{50,48,50,49,45,48,49,45,48,49,0});
 
-        var expected = new SimpleDateFormat("yyyy-MM-dd").parse("2021-01-01");
+        var expected = LocalDate.of(2021, 1,1);
 
         Assertions.assertEquals(1, record.fields.size());
         Assertions.assertSame(YxdbField.DataType.DATE, record.fields.get(0).type());
@@ -139,13 +142,25 @@ public class YxdbRecordTest {
     }
 
     @Test
+    public void TestReadTime() throws ParseException {
+        var record = loadRecordWithValueColumn("Time", 8);
+        var source = wrap(new byte[]{48,51,58,48,52,58,48,53,0});
+
+        var expected = LocalTime.of(3, 4, 5);
+
+        Assertions.assertEquals(expected, record.extractTimeFrom(0, source));
+        Assertions.assertEquals(9, record.fixedSize);
+        Assertions.assertFalse(record.hasVar);
+    }
+
+    @Test
     public void TestReadDateTime() throws ParseException {
         var record = loadRecordWithValueColumn("DateTime", 19);
         var source = wrap(new byte[]{50,48,50,49,45,48,49,45,48,50,32,48,51,58,48,52,58,48,53,0});
 
-        var expected = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse("2021-01-02 03:04:05");
+        var expected = LocalDateTime.of(2021, 1, 2, 3, 4, 5);
 
-        Assertions.assertEquals(expected, record.extractDateFrom(0, source));
+        Assertions.assertEquals(expected, record.extractDateTimeFrom(0, source));
         Assertions.assertEquals(20, record.fixedSize);
         Assertions.assertFalse(record.hasVar);
     }

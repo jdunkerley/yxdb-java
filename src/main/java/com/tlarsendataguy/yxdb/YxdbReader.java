@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -161,7 +162,7 @@ public class YxdbReader {
     }
 
     /**
-     * Reads a long integer field from the .yxdb file
+     * Reads an integer field from the .yxdb file
      * @param  index the index of the field to read, starting at 0
      * @return the value of the long integer field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a long integer field
@@ -171,7 +172,7 @@ public class YxdbReader {
     }
 
     /**
-     * Reads a long integer field from the .yxdb file
+     * Reads an integer field from the .yxdb file
      * @param  name the name of the field to read
      * @return the value of the specified long integer field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a long integer field
@@ -181,7 +182,7 @@ public class YxdbReader {
     }
 
     /**
-     * Reads a numeric field from the .yxdb file
+     * Reads a floating point field from the .yxdb file
      * @param  index the index of the field to read, starting at 0
      * @return the value of the numeric field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a numeric field
@@ -191,13 +192,33 @@ public class YxdbReader {
     }
 
     /**
-     * Reads a numeric field from the .yxdb file
+     * Reads a floating point field from the .yxdb file
      * @param  name the name of the field to read
      * @return the value of the specified numeric field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a numeric field
      */
     public Double readDouble(String name) throws IllegalArgumentException {
         return record.extractDoubleFrom(name, recordReader.recordBuffer);
+    }
+
+    /**
+     * Reads a fixed decimal field from the .yxdb file
+     * @param  index the index of the field to read, starting at 0
+     * @return the value of the numeric field at the specified index. May be null.
+     * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a numeric field
+     */
+    public BigDecimal readDecimal(int index) throws IllegalArgumentException {
+        return record.extractDecimalFrom(index, recordReader.recordBuffer);
+    }
+
+    /**
+     * Reads a fixed decimal field from the .yxdb file
+     * @param  name the name of the field to read
+     * @return the value of the specified numeric field. May be null.
+     * @throws IllegalArgumentException thrown when the field does not exist or is not a numeric field
+     */
+    public BigDecimal readDecimal(String name) throws IllegalArgumentException {
+        return record.extractDecimalFrom(name, recordReader.recordBuffer);
     }
 
     /**

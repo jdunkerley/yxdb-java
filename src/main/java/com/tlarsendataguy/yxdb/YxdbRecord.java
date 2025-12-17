@@ -1,5 +1,6 @@
 package com.tlarsendataguy.yxdb;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,6 +37,9 @@ class YxdbRecord {
         int size;
         for (MetaInfoField field: fields) {
             var yxdbField = record.addFieldNameToIndexMap(field, startAt);
+            if (yxdbField.size() == 4) {
+                record.hasVar = true;
+            }
             startAt += yxdbField.size();
         }
         record.fixedSize = startAt;
@@ -123,6 +127,18 @@ class YxdbRecord {
         return extractDoubleFrom(mapName(name), buffer);
     }
 
+    public BigDecimal extractDecimalFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields.get(index);
+        if (yxdbField.type() != YxdbField.DataType.DECIMAL) {
+            throwInvalidIndex(index, "fixeddecimal");
+        }
+        return Extractors.extractFixedDecimal(buffer, yxdbField.startPosition(), yxdbField.metaInfo().size());
+    }
+
+    public BigDecimal extractDecimalFrom(String name, ByteBuffer buffer) {
+        return extractDecimalFrom(mapName(name), buffer);
+    }
+
     public String extractStringFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields.get(index);
         if (yxdbField.type() != YxdbField.DataType.STRING) {
@@ -155,8 +171,8 @@ class YxdbRecord {
 
     public LocalTime extractTimeFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields.get(index);
-        if (yxdbField.type() != YxdbField.DataType.DATE) {
-            throwInvalidIndex(index, "date");
+        if (yxdbField.type() != YxdbField.DataType.TIME) {
+            throwInvalidIndex(index, "time");
         }
         return Extractors.extractTime(buffer, yxdbField.startPosition());
     }
@@ -167,8 +183,8 @@ class YxdbRecord {
 
     public LocalDateTime extractDateTimeFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields.get(index);
-        if (yxdbField.type() != YxdbField.DataType.DATE) {
-            throwInvalidIndex(index, "date");
+        if (yxdbField.type() != YxdbField.DataType.DATETIME) {
+            throwInvalidIndex(index, "datetime");
         }
         return Extractors.extractDateTime(buffer, yxdbField.startPosition());
     }

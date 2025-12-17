@@ -6,8 +6,10 @@ import org.junit.jupiter.api.Assertions;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class YxdbReaderTest {
     @Test
@@ -31,8 +33,8 @@ public class YxdbReaderTest {
             Assertions.assertEquals(32, yxdb.readLong("Int32Field"));
             Assertions.assertEquals(64, yxdb.readLong(4));
             Assertions.assertEquals(64, yxdb.readLong("Int64Field"));
-            Assertions.assertEquals(123.45, yxdb.readDouble(5));
-            Assertions.assertEquals(123.45, yxdb.readDouble("FixedDecimalField"));
+            Assertions.assertEquals(new BigDecimal("123.450000"), yxdb.readDecimal(5));
+            Assertions.assertEquals(new BigDecimal("123.450000"), yxdb.readDecimal("FixedDecimalField"));
             Assertions.assertEquals(678.9f, yxdb.readDouble(6));
             Assertions.assertEquals(678.9f, yxdb.readDouble("FloatField"));
             Assertions.assertEquals(0.12345, yxdb.readDouble(7));
@@ -50,13 +52,13 @@ public class YxdbReaderTest {
             Assertions.assertEquals("W".repeat(500), yxdb.readString(13));
             Assertions.assertEquals("W".repeat(500), yxdb.readString("V_WStringLongField"));
 
-            var expectedDate = new SimpleDateFormat("yyyy-MM-dd").parse("2020-01-01");
+            var expectedDate = LocalDate.of(2020, 1, 1);
             Assertions.assertEquals(expectedDate, yxdb.readDate(14));
             Assertions.assertEquals(expectedDate, yxdb.readDate("DateField"));
 
-            var expectedDateTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse("2020-02-03 04:05:06");
-            Assertions.assertEquals(expectedDateTime, yxdb.readDate(15));
-            Assertions.assertEquals(expectedDateTime, yxdb.readDate("DateTimeField"));
+            var expectedDateTime = LocalDateTime.of(2020, 2, 3, 4, 5, 6);
+            Assertions.assertEquals(expectedDateTime, yxdb.readDateTime(15));
+            Assertions.assertEquals(expectedDateTime, yxdb.readDateTime("DateTimeField"));
 
             read++;
         }

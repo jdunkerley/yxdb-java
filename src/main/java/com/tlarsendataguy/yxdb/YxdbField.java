@@ -44,7 +44,9 @@ public record YxdbField(MetaInfoField metaInfo, int index, int startPosition) {
             case "Date" -> 11;
             case "Time" -> 9;
             case "DateTime" -> 20;
-            case "FixedDecimal", "String", "WString", "V_String", "V_WString", "Blob", "SpatialObj" -> metaInfo.size() + 1;
+            case "FixedDecimal", "String" -> metaInfo.size() + 1;
+            case "WString" -> metaInfo.size() * 2 + 1;
+            case "V_String", "V_WString", "Blob", "SpatialObj" -> 4;
             default -> throw new IllegalArgumentException("Unknown field type: " + metaInfo.type());
         };
     }
