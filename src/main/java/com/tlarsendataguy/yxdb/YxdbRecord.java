@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 class YxdbRecord {
     private YxdbRecord(int fieldCount){
@@ -61,13 +60,17 @@ class YxdbRecord {
             case BYTE -> extractByteFrom(index, buffer);
             case LONG -> extractLongFrom(index, buffer);
             case DOUBLE -> extractDoubleFrom(index, buffer);
+            case DECIMAL -> extractDecimalFrom(index, buffer);
             case STRING -> extractStringFrom(index, buffer);
             case DATE -> extractDateFrom(index, buffer);
             case TIME -> extractTimeFrom(index, buffer);
             case DATETIME -> extractDateTimeFrom(index, buffer);
-            case BLOB -> extractBlobFrom(index, buffer);
-            default -> throw new IllegalArgumentException("Field at index " + index + " has unsupported type for object extraction");
+            case BLOB ->  (yxdbField.alteryxTypeName() == "SpatialObj" ? Spatial.ToGeoJson(extractBlobFrom(index, buffer)) : extractBlobFrom(index, buffer));
         };
+    }
+
+    public Object extractObjectFrom(String name, ByteBuffer buffer) {
+        return extractObjectFrom(mapName(name), buffer);
     }
 
     public Boolean extractBooleanFrom(int index, ByteBuffer buffer) {

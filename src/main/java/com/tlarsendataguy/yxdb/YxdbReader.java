@@ -121,6 +121,37 @@ public class YxdbReader {
         return recordReader.nextRecord();
     }
 
+    public Object readPolyglotObject(int index) throws IllegalArgumentException {
+        var rawObject = readObject(index);
+        return switch (rawObject) {
+            case null -> null;
+            case BigDecimal bd -> bd.toString();
+            case LocalDateTime ldt -> ldt.toString();
+            default -> rawObject;
+        };
+    }
+
+    /**
+     * Reads a field from the .yxdb file
+     * @param  index the index of the field to read, starting at 0
+     * @return the value of the byte field at the specified index. May be null
+     * @throws IllegalArgumentException thrown when the index is out of range
+     */
+    public Object readObject(int index) throws IllegalArgumentException {
+        return record.extractObjectFrom(index, recordReader.recordBuffer);
+    }
+
+    /**
+     * Reads a field from the .yxdb file
+     * @param  name the name of the field to read
+     * @return the value of the specified byte field. May be null.
+     * @throws IllegalArgumentException thrown when the field does not exist
+     */
+    public Object readObject(String name) throws IllegalArgumentException {
+        return record.extractObjectFrom(name, recordReader.recordBuffer);
+    }
+
+
     /**
      * Reads a byte field from the .yxdb file
      * @param  index the index of the field to read, starting at 0

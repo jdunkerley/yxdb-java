@@ -34,6 +34,18 @@ public record YxdbField(MetaInfoField metaInfo, int index, int startPosition) {
         };
     }
 
+    public String alteryxTypeName() {
+        return metaInfo.type();
+    }
+
+    public int dataSize() {
+        return switch (metaInfo.type()) {
+            case "FixedDecimal", "String", "V_String", "WString", "V_WString", "Blob", "SpatialObj" ->
+                metaInfo.size();
+            default -> -1;
+        };
+    }
+
     public int size() {
         return switch (metaInfo.type()) {
             case "Int16" -> 3;
