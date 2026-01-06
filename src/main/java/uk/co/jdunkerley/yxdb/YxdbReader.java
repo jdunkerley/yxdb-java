@@ -415,7 +415,7 @@ public class YxdbReader {
 
             var newField = parseField(fields.size(), position, field);
             fields.add(newField);
-            position += YxdbType.sizeOf(newField);
+            position = newField.endPosition();
         }
     }
 

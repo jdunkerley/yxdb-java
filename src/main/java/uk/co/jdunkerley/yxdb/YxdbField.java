@@ -27,6 +27,17 @@ public record YxdbField(int index, int startPosition, String name, String yxdbTy
         };
     }
 
+    public int endPosition() {
+        return startPosition + YxdbType.sizeOf(this);
+    }
+
+    public boolean isVariableLength() {
+        return switch (yxdbType()) {
+            case YxdbType.V_STRING, YxdbType.V_WSTRING, YxdbType.BLOB, YxdbType.SPATIAL_OBJ -> true;
+            default -> false;
+        };
+    }
+
     public DataType dataType() {
         return YxdbType.dataTypeOf(yxdbType());
     }

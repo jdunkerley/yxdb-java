@@ -33,11 +33,8 @@ class YxdbRecord {
         int lastRecord = 0;
         for (YxdbField field: fields) {
             record.addFieldNameToIndexMap(field);
-            var fieldSize = YxdbType.sizeOf(field);
-            if (fieldSize == 4) {
-                record.hasVar = true;
-            }
-            lastRecord = field.startPosition() + fieldSize;
+            record.hasVar = record.hasVar || field.isVariableLength();
+            lastRecord = field.endPosition();
         }
         record.fixedSize = lastRecord;
         return record;
