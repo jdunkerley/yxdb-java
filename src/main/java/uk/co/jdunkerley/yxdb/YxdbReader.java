@@ -1,4 +1,4 @@
-package com.tlarsendataguy.yxdb;
+package uk.co.jdunkerley.yxdb;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -71,6 +71,9 @@ public class YxdbReader {
         fields = new ArrayList<>();
         loadHeaderAndMetaInfo();
     }
+
+    public long fileID;
+    public long creationDate;
 
     /**
      * The total number of records in the .yxdb file.
@@ -354,10 +357,15 @@ public class YxdbReader {
 
     private void loadHeaderAndMetaInfo() throws IOException, IllegalArgumentException {
         var header = getHeader();
-        var fileType = new String(header.array(), 0, 21, StandardCharsets.ISO_8859_1);
-        if (!"Alteryx Database File".equals(fileType)) {
+        var fileType = new String(header.array(), 0, 64, StandardCharsets.ISO_8859_1).trim();
+        if ("Alteryx e2 Database file".equals(fileType)) {
+            closeStreamAndThrow("reading e2 YXDB files is not supported");
+        }
+        if (!fileType.startsWith("Alteryx Database File")) {
             closeStreamAndThrow();
         }
+        fileID = header.getLong(64);
+        creationDate = header.getLong(72);
         numRecords = header.getLong(104);
         metaInfoSize = header.getInt(80);
         loadMetaInfo();
@@ -471,12 +479,15 @@ public class YxdbReader {
     }
 
     private void closeStreamAndThrow() throws IllegalArgumentException {
+        closeStreamAndThrow("file is not a valid YXDB file");
+    }
+
+    private void closeStreamAndThrow(String message) throws IllegalArgumentException {
         try {
             stream.close();
         }
         catch (Exception ex) {
-            throw new IllegalArgumentException("file is not a valid YXDB file");
         }
-        throw new IllegalArgumentException("file is not a valid YXDB file");
+        throw new IllegalArgumentException(message);
     }
 }

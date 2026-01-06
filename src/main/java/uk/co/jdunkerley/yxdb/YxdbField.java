@@ -1,4 +1,4 @@
-package com.tlarsendataguy.yxdb;
+package uk.co.jdunkerley.yxdb;
 
 /**
  * Contains field information parsed from .yxdb metadata.
@@ -47,20 +47,7 @@ public record YxdbField(MetaInfoField metaInfo, int index, int startPosition) {
     }
 
     public int size() {
-        return switch (metaInfo.type()) {
-            case "Int16" -> 3;
-            case "Int32", "Float" -> 5;
-            case "Int64", "Double" -> 9;
-            case "Bool" -> 1;
-            case "Byte" -> 2;
-            case "Date" -> 11;
-            case "Time" -> 9;
-            case "DateTime" -> 20;
-            case "FixedDecimal", "String" -> metaInfo.size() + 1;
-            case "WString" -> metaInfo.size() * 2 + 1;
-            case "V_String", "V_WString", "Blob", "SpatialObj" -> 4;
-            default -> throw new IllegalArgumentException("Unknown field type: " + metaInfo.type());
-        };
+        return YxdbType.sizeOf(metaInfo);
     }
 
     /**

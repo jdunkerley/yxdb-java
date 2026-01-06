@@ -1,4 +1,4 @@
-package com.tlarsendataguy.yxdb;
+package uk.co.jdunkerley.yxdb;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;

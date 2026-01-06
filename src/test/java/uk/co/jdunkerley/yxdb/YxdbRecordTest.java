@@ -1,4 +1,4 @@
-package com.tlarsendataguy.yxdb;
+package uk.co.jdunkerley.yxdb;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

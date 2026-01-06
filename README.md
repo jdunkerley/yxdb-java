@@ -2,6 +2,8 @@
 
 yxdb-java is a library for reading YXDB files into Java applications.
 
+**Note:** This library only supports reading non-AMP YXDB files and does not support spatial indexes. It cannot write YXDB files.
+
 The library does not have external dependencies and is a pure Java solution.
 
 The public API is contained in the YxdbReader class. Instantiate YxdbReader using one of the two constructors:

@@ -1,4 +1,4 @@
-package com.tlarsendataguy.yxdb;
+package uk.co.jdunkerley.yxdb;
 
 class Lzf {
     Lzf(byte[] inBuffer, byte[] outBuffer){
