@@ -174,7 +174,7 @@ public class YxdbReaderTest {
             new YxdbReader("src/test/resources/invalid.txt");
         } catch (Exception ex) {
             var msg = ex.getMessage();
-            Assertions.assertEquals("file is not a valid YXDB file", msg);
+            Assertions.assertEquals("File is not a valid YXDB file.", msg);
             ex.printStackTrace();
         }
     }
@@ -185,7 +185,7 @@ public class YxdbReaderTest {
             new YxdbReader("src/test/resources/invalidSmall.txt");
         } catch (Exception ex) {
             var msg = ex.getMessage();
-            Assertions.assertEquals("file is not a valid YXDB file", msg);
+            Assertions.assertEquals("File is not a valid YXDB file.", msg);
             ex.printStackTrace();
         }
     }
@@ -196,7 +196,7 @@ public class YxdbReaderTest {
             new YxdbReader("src/test/resources/ampdata.yxdb");
         } catch (Exception ex) {
             var msg = ex.getMessage();
-            Assertions.assertEquals("reading e2 YXDB files is not supported", msg);
+            Assertions.assertEquals("Reading AMP YXDB files is not supported.", msg);
             ex.printStackTrace();
         }
     }

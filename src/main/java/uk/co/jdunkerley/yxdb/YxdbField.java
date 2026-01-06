@@ -1,70 +1,33 @@
 package uk.co.jdunkerley.yxdb;
 
-/**
- * Contains field information parsed from .yxdb metadata.
- * @param metaInfo The MetaInfoField object containing raw metadata.
- * @param startPosition The starting byte position of the field in a record.
- */
-public record YxdbField(MetaInfoField metaInfo, int index, int startPosition) {
-    public String name() {
-        return metaInfo.name();
-    }
+import java.util.function.IntSupplier;
 
-    public String source() {
-        return metaInfo.source();
-    }
-
-    public String description() {
-        return metaInfo.description();
-    }
-
-    public DataType type() {
-        return switch (metaInfo.type()) {
-            case "Int16", "Int32", "Int64" -> DataType.LONG;
-            case "Float", "Double" -> DataType.DOUBLE;
-            case "FixedDecimal" -> DataType.DECIMAL;
-            case "String", "WString", "V_String", "V_WString" -> DataType.STRING;
-            case "Date" -> DataType.DATE;
-            case "Time" -> DataType.TIME;
-            case "DateTime" -> DataType.DATETIME;
-            case "Bool" -> DataType.BOOLEAN;
-            case "Byte" -> DataType.BYTE;
-            case "Blob", "SpatialObj" -> DataType.BLOB;
-            default -> throw new IllegalArgumentException("Unknown field type: " + metaInfo.type());
+public record YxdbField(int index, int startPosition, String name, String yxdbType, int size, int scale, String source, String description) {
+    static YxdbField makeField(int index, int startPosition, String name, String type, String source, String description, IntSupplier sizeProvider, IntSupplier scaleProvider)
+        throws IllegalArgumentException {
+        return switch (type) {
+            case YxdbType.BYTE -> new YxdbField(index, startPosition, name, YxdbType.BYTE, 1, 0, source, description);
+            case YxdbType.BOOLEAN -> new YxdbField(index, startPosition, name, YxdbType.BOOLEAN, 1, 0, source, description);
+            case YxdbType.INT16 -> new YxdbField(index, startPosition, name, YxdbType.INT16, 2, 0, source, description);
+            case YxdbType.INT32 -> new YxdbField(index, startPosition, name, YxdbType.INT32, 4, 0, source, description);
+            case YxdbType.INT64 -> new YxdbField(index, startPosition, name, YxdbType.INT64, 8, 0, source, description);
+            case YxdbType.FLOAT -> new YxdbField(index, startPosition, name, YxdbType.FLOAT, 4, 0, source, description);
+            case YxdbType.DOUBLE -> new YxdbField(index, startPosition, name, YxdbType.DOUBLE, 8, 0, source, description);
+            case YxdbType.DECIMAL -> new YxdbField(index, startPosition, name, YxdbType.DECIMAL, sizeProvider.getAsInt(), scaleProvider.getAsInt(), source, description);
+            case YxdbType.DATE -> new YxdbField(index, startPosition, name, YxdbType.DATE, 10, 0, source, description);
+            case YxdbType.TIME -> new YxdbField(index, startPosition, name, YxdbType.TIME, 8, 0, source, description);
+            case YxdbType.DATETIME -> new YxdbField(index, startPosition, name, YxdbType.DATETIME, 16, 0, source, description);
+            case YxdbType.STRING -> new YxdbField(index, startPosition, name, YxdbType.STRING, sizeProvider.getAsInt(), 0, source, description);
+            case YxdbType.V_STRING -> new YxdbField(index, startPosition, name, YxdbType.V_STRING, 4, 0, source, description);
+            case YxdbType.WSTRING -> new YxdbField(index, startPosition, name, YxdbType.WSTRING, sizeProvider.getAsInt(), 0, source, description);
+            case YxdbType.V_WSTRING -> new YxdbField(index, startPosition, name, YxdbType.V_WSTRING, 4, 0, source, description);
+            case YxdbType.BLOB -> new YxdbField(index, startPosition, name, YxdbType.BLOB, 4, 0, source, description);
+            case YxdbType.SPATIAL_OBJ -> new YxdbField(index, startPosition, name, YxdbType.SPATIAL_OBJ, 4, 0, source, description);
+            default -> throw new IllegalArgumentException("Unknown field YXDB type: " + type);
         };
     }
 
-    public String alteryxTypeName() {
-        return metaInfo.type();
-    }
-
-    public int dataSize() {
-        return switch (metaInfo.type()) {
-            case "FixedDecimal", "String", "V_String", "WString", "V_WString", "Blob", "SpatialObj" ->
-                metaInfo.size();
-            default -> -1;
-        };
-    }
-
-    public int size() {
-        return YxdbType.sizeOf(metaInfo);
-    }
-
-    /**
-     * Fields can contain one of the following types of data. All fields types may return nulls.
-     * <ul>
-     *     <li>BLOB: an array of bytes</li>
-     *     <li>BOOLEAN: boolean values</li>
-     *     <li>BYTE: a single byte</li>
-     *     <li>DATE: a date value</li>
-     *     <li>TIME: a time value</li>
-     *     <li>DATETIME: a date and time value</li>
-     *     <li>DOUBLE: floating point numbers</li>
-     *     <li>LONG: integers</li>
-     *     <li>STRING: text</li>
-     * </ul>
-     */
-    public enum DataType {
-        BLOB, BOOLEAN, BYTE, DATE, TIME, DATETIME, DOUBLE, LONG, DECIMAL, STRING
+    public DataType dataType() {
+        return YxdbType.dataTypeOf(this);
     }
 }

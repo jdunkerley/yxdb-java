@@ -84,7 +84,7 @@ public class YxdbReader {
      * Contains the raw XML metadata from the .yxdb file.
      */
     public String metaInfoStr;
-    private final List<MetaInfoField> fields;
+    private final List<YxdbField> fields;
     private final BufferedInputStream stream;
     private final String path;
     private YxdbRecord record;
@@ -357,18 +357,22 @@ public class YxdbReader {
 
     private void loadHeaderAndMetaInfo() throws IOException, IllegalArgumentException {
         var header = getHeader();
+
         var fileType = new String(header.array(), 0, 64, StandardCharsets.ISO_8859_1).trim();
         if ("Alteryx e2 Database file".equals(fileType)) {
-            closeStreamAndThrow("reading e2 YXDB files is not supported");
+            throw closeStreamWithException("Reading AMP YXDB files is not supported.");
         }
         if (!fileType.startsWith("Alteryx Database File")) {
-            closeStreamAndThrow();
+            throw closeStreamWithException();
         }
+
         fileID = header.getLong(64);
         creationDate = header.getLong(72);
         numRecords = header.getLong(104);
         metaInfoSize = header.getInt(80);
+
         loadMetaInfo();
+
         record = YxdbRecord.newFromFieldList(fields);
         recordReader = new BufferedRecordReader(stream, record.fixedSize, record.hasVar, numRecords);
     }
@@ -376,34 +380,42 @@ public class YxdbReader {
     private void loadMetaInfo() throws IOException, IllegalArgumentException {
         var metaInfoBytes = stream.readNBytes((metaInfoSize*2)-2); //YXDB strings are null-terminated, so exclude the last character
         if (metaInfoBytes.length < (metaInfoSize*2)-2) {
-            closeStreamAndThrow();
+            throw closeStreamWithException();
         }
+
         var skipped = stream.skip(2);
         if (skipped != 2) {
-            closeStreamAndThrow();
+            throw closeStreamWithException();
         }
+
         metaInfoStr = new String(metaInfoBytes, StandardCharsets.UTF_16LE);
         getFields();
     }
 
     private ByteBuffer getHeader() throws IOException, IllegalArgumentException {
         var headerBytes = new byte[512];
+
         var written = stream.readNBytes(headerBytes,0, 512);
         if (written < 512) {
-            closeStreamAndThrow();
+            throw closeStreamWithException();
         }
+
         return ByteBuffer.wrap(headerBytes).order(ByteOrder.LITTLE_ENDIAN);
     }
 
     private void getFields() throws IllegalArgumentException {
         var nodes = getRecordInfoNodes();
 
+        int position = 0;
         for (int i = 0; i < nodes.getLength(); i++) {
             var field = nodes.item(i);
             if (field.getNodeType() != Node.ELEMENT_NODE) {
                 continue;
             }
-            parseField(field);
+
+            var newField = parseField(fields.size(), position, field);
+            fields.add(newField);
+            position += YxdbType.sizeOf(newField);
         }
     }
 
@@ -414,80 +426,69 @@ public class YxdbReader {
             doc = builder.parse(new InputSource(new StringReader(metaInfoStr)));
             doc.getDocumentElement().normalize();
         } catch (Exception ex) {
-            closeStreamAndThrow();
-            throw new IllegalArgumentException();
+            throw closeStreamWithException();
         }
 
         var info = doc.getElementsByTagName("RecordInfo").item(0);
         return info.getChildNodes();
     }
 
-    private void parseField(Node field) {
+    private YxdbField parseField(int index, int position, Node field) {
         var attributes = field.getAttributes();
+
         var name = attributes.getNamedItem("name");
+        var type = attributes.getNamedItem("type");
+        if (name == null || type == null) {
+            throw closeStreamWithException();
+        }
+
         var nameStr = name.getNodeValue();
+        var typeStr = type.getNodeValue();
 
         var source = attributes.getNamedItem("source");
         var sourceStr = source != null ? source.getNodeValue() : null;
         var description = attributes.getNamedItem("description");
         var descriptionStr = description != null ? description.getNodeValue() : null;
 
-        var size = attributes.getNamedItem("size");
-        var type = attributes.getNamedItem("type");
-        var scale = attributes.getNamedItem("scale");
-
-        if (name == null || type == null) {
-            closeStreamAndThrow();
-            return;
-        }
-
-        switch (type.getNodeValue()) {
-            case "Byte" -> fields.add(new MetaInfoField(nameStr, "Byte", 1, 0, sourceStr, descriptionStr));
-            case "Bool" -> fields.add(new MetaInfoField(nameStr, "Bool", 1, 0, sourceStr, descriptionStr));
-            case "Int16" -> fields.add(new MetaInfoField(nameStr, "Int16", 2, 0, sourceStr, descriptionStr));
-            case "Int32" -> fields.add(new MetaInfoField(nameStr, "Int32", 4, 0, sourceStr, descriptionStr));
-            case "Int64" -> fields.add(new MetaInfoField(nameStr, "Int64", 8, 0, sourceStr, descriptionStr));
-            case "FixedDecimal" -> {
-                if (scale == null || size == null) {
-                    closeStreamAndThrow();
-                    return;
-                }
-                fields.add(new MetaInfoField(nameStr, "FixedDecimal", parseInt(size.getNodeValue()), parseInt(scale.getNodeValue()), sourceStr, descriptionStr));
-            }
-            case "Float" -> fields.add(new MetaInfoField(nameStr, "Float", 4, 0, sourceStr, descriptionStr));
-            case "Double" -> fields.add(new MetaInfoField(nameStr, "Double", 8, 0, sourceStr, descriptionStr));
-            case "String" -> {
-                if (size == null) {
-                    closeStreamAndThrow();
-                    return;
-                }
-                fields.add(new MetaInfoField(nameStr, "String", parseInt(size.getNodeValue()), 0, sourceStr, descriptionStr));
-            }
-            case "WString" -> {
-                if (size == null) {
-                    closeStreamAndThrow();
-                    return;
-                }
-                fields.add(new MetaInfoField(nameStr, "WString", parseInt(size.getNodeValue()), 0, sourceStr, descriptionStr));
-            }
-            case "V_String", "V_WString", "Blob", "SpatialObj" -> fields.add(new MetaInfoField(nameStr, type.getNodeValue(), 4, 0, sourceStr, descriptionStr));
-            case "Date" -> fields.add(new MetaInfoField(nameStr, "Date", 10, 0, sourceStr, descriptionStr));
-            case "Time" -> fields.add(new MetaInfoField(nameStr, "Time", 8, 0, sourceStr, descriptionStr));
-            case "DateTime" -> fields.add(new MetaInfoField(nameStr, "DateTime", 19, 0, sourceStr, descriptionStr));
-            default -> closeStreamAndThrow();
+        try {
+            return YxdbField.makeField(
+                    index,
+                    position,
+                    nameStr,
+                    typeStr,
+                    sourceStr,
+                    descriptionStr,
+                    () -> parseIntFromNode(field, "size", nameStr),
+                    () -> parseIntFromNode(field, "scale", nameStr));
+        } catch (IllegalArgumentException ex) {
+            throw closeStreamWithException(ex.getMessage());
         }
     }
 
-    private void closeStreamAndThrow() throws IllegalArgumentException {
-        closeStreamAndThrow("file is not a valid YXDB file");
+    private int parseIntFromNode(Node node, String attributeName, String fieldName) {
+        var attribute = node.getAttributes().getNamedItem(attributeName);
+        if (attribute == null) {
+            throw new IllegalArgumentException("Field " + fieldName + " is missing required attribute: " + attributeName);
+        }
+
+        try {
+            return parseInt(attribute.getNodeValue());
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException("Field " + fieldName + " has invalid integer value for attribute: " + attributeName);
+        }
     }
 
-    private void closeStreamAndThrow(String message) throws IllegalArgumentException {
+    private IllegalArgumentException closeStreamWithException() {
+        return closeStreamWithException("File is not a valid YXDB file.");
+    }
+
+    private IllegalArgumentException closeStreamWithException(String message) {
         try {
             stream.close();
         }
-        catch (Exception ex) {
+        catch (Exception _) {
         }
-        throw new IllegalArgumentException(message);
+
+        return new IllegalArgumentException(message);
     }
 }

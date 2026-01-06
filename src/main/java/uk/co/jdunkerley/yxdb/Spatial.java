@@ -125,7 +125,7 @@ public class Spatial {
 
     private static String GeoJson(String objType, Object coordinates) {
         var builder = new StringBuilder();
-        builder.append("{\"type\":\"");
+        builder.append("{\"yxdbType\":\"");
         builder.append(objType);
         builder.append("\",\"coordinates\":");
         CoordinatesToJson(builder, coordinates);
