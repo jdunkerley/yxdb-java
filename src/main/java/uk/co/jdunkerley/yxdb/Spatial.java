@@ -68,7 +68,7 @@ public class Spatial {
         var lines = ParseMultiPointObjects(value);
 
         if (lines.size() == 1) {
-            return GeoJson("LineString", lines.get(0));
+            return GeoJson("LineString", lines.getFirst());
         }
         return GeoJson("MultiLineString", lines);
     }

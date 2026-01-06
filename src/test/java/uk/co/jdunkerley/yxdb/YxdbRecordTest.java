@@ -19,8 +19,8 @@ public class YxdbRecordTest {
         var source = wrap(new byte[]{23,0,0});
 
         Assertions.assertEquals(1, record.fields.size());
-        Assertions.assertSame(DataType.LONG, record.fields.get(0).dataType());
-        Assertions.assertEquals("value", record.fields.get(0).name());
+        Assertions.assertSame(DataType.LONG, record.fields.getFirst().dataType());
+        Assertions.assertEquals("value", record.fields.getFirst().name());
         Assertions.assertEquals(23, record.extractLongFrom(0, source));
         Assertions.assertEquals(23, record.extractLongFrom("value", source));
         Assertions.assertEquals(3, record.fixedSize);
@@ -53,8 +53,8 @@ public class YxdbRecordTest {
         var source = wrap(new byte[]{-51,-52,-116,63,0,0,0,0, 0});
 
         Assertions.assertEquals(1, record.fields.size());
-        Assertions.assertSame(DataType.DOUBLE, record.fields.get(0).dataType());
-        Assertions.assertEquals("value", record.fields.get(0).name());
+        Assertions.assertSame(DataType.DOUBLE, record.fields.getFirst().dataType());
+        Assertions.assertEquals("value", record.fields.getFirst().name());
         Assertions.assertEquals(1.1f, record.extractDoubleFrom(0, source));
         Assertions.assertEquals(1.1f, record.extractDoubleFrom("value", source));
         Assertions.assertEquals(5, record.fixedSize);
@@ -87,8 +87,8 @@ public class YxdbRecordTest {
         var source = wrap(new byte[]{104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0, 23, 77, 0});
 
         Assertions.assertEquals(1, record.fields.size());
-        Assertions.assertSame(DataType.STRING, record.fields.get(0).dataType());
-        Assertions.assertEquals("value", record.fields.get(0).name());
+        Assertions.assertSame(DataType.STRING, record.fields.getFirst().dataType());
+        Assertions.assertEquals("value", record.fields.getFirst().name());
         Assertions.assertEquals("hello world!", record.extractStringFrom(0, source));
         Assertions.assertEquals("hello world!", record.extractStringFrom("value", source));
         Assertions.assertEquals(16, record.fixedSize);
@@ -133,8 +133,8 @@ public class YxdbRecordTest {
         var expected = LocalDate.of(2021, 1,1);
 
         Assertions.assertEquals(1, record.fields.size());
-        Assertions.assertSame(DataType.DATE, record.fields.get(0).dataType());
-        Assertions.assertEquals("value", record.fields.get(0).name());
+        Assertions.assertSame(DataType.DATE, record.fields.getFirst().dataType());
+        Assertions.assertEquals("value", record.fields.getFirst().name());
         Assertions.assertEquals(expected, record.extractDateFrom(0, source));
         Assertions.assertEquals(expected, record.extractDateFrom("value", source));
         Assertions.assertEquals(11, record.fixedSize);
@@ -171,8 +171,8 @@ public class YxdbRecordTest {
         var source = wrap(new byte[]{1});
 
         Assertions.assertEquals(1, record.fields.size());
-        Assertions.assertSame(DataType.BOOLEAN, record.fields.get(0).dataType());
-        Assertions.assertEquals("value", record.fields.get(0).name());
+        Assertions.assertSame(DataType.BOOLEAN, record.fields.getFirst().dataType());
+        Assertions.assertEquals("value", record.fields.getFirst().name());
         Assertions.assertTrue(record.extractBooleanFrom(0, source));
         Assertions.assertTrue(record.extractBooleanFrom("value", source));
         Assertions.assertEquals(1, record.fixedSize);
@@ -185,8 +185,8 @@ public class YxdbRecordTest {
         var source = wrap(new byte[]{23, 0});
 
         Assertions.assertEquals(1, record.fields.size());
-        Assertions.assertSame(DataType.BYTE, record.fields.get(0).dataType());
-        Assertions.assertEquals("value", record.fields.get(0).name());
+        Assertions.assertSame(DataType.BYTE, record.fields.getFirst().dataType());
+        Assertions.assertEquals("value", record.fields.getFirst().name());
         Assertions.assertEquals((byte)23, record.extractByteFrom(0, source));
         Assertions.assertEquals((byte)23, record.extractByteFrom("value", source));
         Assertions.assertEquals(2, record.fixedSize);
@@ -199,8 +199,8 @@ public class YxdbRecordTest {
         var source = wrap(new byte[]{0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
 
         Assertions.assertEquals(1, record.fields.size());
-        Assertions.assertSame(DataType.BLOB, record.fields.get(0).dataType());
-        Assertions.assertEquals("value", record.fields.get(0).name());
+        Assertions.assertSame(DataType.BLOB, record.fields.getFirst().dataType());
+        Assertions.assertEquals("value", record.fields.getFirst().name());
         Assertions.assertArrayEquals(new byte[]{}, record.extractBlobFrom(0, source));
         Assertions.assertArrayEquals(new byte[]{}, record.extractBlobFrom("value", source));
         Assertions.assertEquals(4, record.fixedSize);
@@ -213,8 +213,8 @@ public class YxdbRecordTest {
         var source = wrap(new byte[]{0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
 
         Assertions.assertEquals(1, record.fields.size());
-        Assertions.assertSame(DataType.BLOB, record.fields.get(0).dataType());
-        Assertions.assertEquals("value", record.fields.get(0).name());
+        Assertions.assertSame(DataType.BLOB, record.fields.getFirst().dataType());
+        Assertions.assertEquals("value", record.fields.getFirst().name());
         Assertions.assertArrayEquals(new byte[]{}, record.extractBlobFrom(0, source));
     }
 
