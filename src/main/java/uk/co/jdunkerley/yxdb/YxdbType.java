@@ -37,8 +37,8 @@ final class YxdbType {
         };
     }
 
-    static DataType dataTypeOf(YxdbField field) {
-        return switch (field.yxdbType()) {
+    static DataType dataTypeOf(String yxdbType) {
+        return switch (yxdbType) {
             case BOOLEAN -> DataType.BOOLEAN;
             case BYTE -> DataType.BYTE;
             case INT16, INT32, INT64 -> DataType.LONG;
@@ -49,7 +49,7 @@ final class YxdbType {
             case TIME -> DataType.TIME;
             case DATETIME -> DataType.DATETIME;
             case BLOB, SPATIAL_OBJ -> DataType.BLOB;
-            default -> throw new IllegalArgumentException("Unknown field yxdbType: " + field.yxdbType());
+            default -> throw new IllegalArgumentException("Unknown field yxdbType: " + yxdbType);
         };
     }
 }

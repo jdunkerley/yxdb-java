@@ -28,6 +28,6 @@ public record YxdbField(int index, int startPosition, String name, String yxdbTy
     }
 
     public DataType dataType() {
-        return YxdbType.dataTypeOf(this);
+        return YxdbType.dataTypeOf(yxdbType());
     }
 }
