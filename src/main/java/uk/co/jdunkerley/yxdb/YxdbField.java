@@ -2,6 +2,18 @@ package uk.co.jdunkerley.yxdb;
 
 import java.util.function.IntSupplier;
 
+/** Represents a field in a YXDB file.
+ * @param index         The index of the field.
+ * @param startPosition The start byte position of the field in the record.
+ * @param name          The name of the field.
+ * @param yxdbType      The YXDB data type of the field.
+ * @param size          The size of the field.
+ *                      For fixed-length types, this is the fixed size.
+ *                      For variable-length types, this is the alwyays 4 (the size of the length prefix).
+ * @param scale         The scale of the field (for decimal types).
+ * @param source        The source of the field.
+ * @param description   The description of the field.
+ */
 public record YxdbField(int index, int startPosition, String name, String yxdbType, int size, int scale, String source,
                         String description) {
     static YxdbField makeField(int index, int startPosition, String name, String type, String source, String description, IntSupplier sizeProvider, IntSupplier scaleProvider)
@@ -37,10 +49,16 @@ public record YxdbField(int index, int startPosition, String name, String yxdbTy
         };
     }
 
+    /** Calculates the end position of the field in the record.
+     * @return The end byte position of the field in the record.
+     */
     public int endPosition() {
         return startPosition + YxdbType.sizeOf(this);
     }
 
+    /** Determines if the field is of variable length.
+     * @return True if the field is variable length, false otherwise.
+     */
     public boolean isVariableLength() {
         return switch (yxdbType()) {
             case YxdbType.V_STRING, YxdbType.V_WSTRING, YxdbType.BLOB, YxdbType.SPATIAL_OBJ -> true;
@@ -48,6 +66,9 @@ public record YxdbField(int index, int startPosition, String name, String yxdbTy
         };
     }
 
+    /** Maps the YXDB type to a data type.
+     * @return The data type of the field.
+     */
     public DataType dataType() {
         return YxdbType.dataTypeOf(yxdbType());
     }

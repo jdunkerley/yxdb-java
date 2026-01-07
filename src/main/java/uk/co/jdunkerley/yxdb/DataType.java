@@ -15,14 +15,33 @@ package uk.co.jdunkerley.yxdb;
  * </ul>
  */
 public enum DataType {
+    /** BLOB: a byte[] (either a Blob or SpatialObj in Alteryx) */
     BLOB,
+
+    /** BOOLEAN: a boolean */
     BOOLEAN,
+
+    /**  BYTE: a byte */
     BYTE,
+
+    /** Date: a LocalDate value */
     DATE,
+
+    /** TIME: a LocalTime value */
     TIME,
+
+    /** DATETIME: a LocalDateTime value */
     DATETIME,
+
+    /** DOUBLE: a double (either a Float or Double in Alteryx) */
     DOUBLE,
+
+    /** LONG: a long (either Int16, Int32 or Int64 in Alteryx) */
     LONG,
+
+    /** DECIMAL: a BigDecimal value */
     DECIMAL,
+
+    /** STRING: a String value (either String, WString, V_String or V_WString in Alteryx) */
     STRING
 }

@@ -8,10 +8,13 @@ import java.util.List;
 /**
  * Spatial contains a static function to translate SpatialObj fields into GeoJSON.
  */
-public class Spatial {
+public final class Spatial {
     final static private int BytesPerPoint = 16;
 
     private record Point(double lng, double lat) {}
+
+    private Spatial() {
+    }
 
     /**
      * ToGeoJson translates SpatialObj fields into GeoJSON.

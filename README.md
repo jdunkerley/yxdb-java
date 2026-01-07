@@ -48,3 +48,17 @@ To read spatial objects, use the `yxdb.Spatial.toGeoJson()` function. The `ToGeo
 
 For convenience, there is also a generic `read(int index)` and `read(String name)` method that returns an `Object`. The returned object will be of the appropriate Java type for the field. Spatial objects will be converted to GeoJSON strings in this method.
 
+### Publishing to Maven Central
+
+To publish a new version of yxdb-java to Maven Central, follow these steps:
+1. Update the version number in `build.gradle` to the desired new version.
+2. Ensure you have the necessary credentials for Sonatype OSSRH configured in your Gradle properties
+  - `user.id`, `user.email`, `user.name`
+  - `signing.keyId`, `signing.password`, `signing.secretKeyRingFile`
+  - `mavenCentralUsername`, `mavenCentralPassword`
+3. Run the Gradle publish task:
+   ```
+   ./gradlew publishToMavenCentral
+   ```
+
+For more details look at https://github.com/vanniktech/gradle-maven-publish-plugin
