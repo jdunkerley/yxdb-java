@@ -1,4 +1,4 @@
-package com.tlarsendataguy.yxdb;
+package uk.co.jdunkerley.yxdb;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +7,7 @@ import java.nio.ByteOrder;
 
 class BufferedRecordReader {
     static int lzfBufferSize = 262144;
+
     public BufferedRecordReader(InputStream stream, int fixedLen, boolean hasVarFields, long totalRecords) {
         this.totalRecords = totalRecords;
         this.stream = stream;
@@ -22,6 +23,7 @@ class BufferedRecordReader {
         lzf = new Lzf(lzfIn.array(), lzfOut.array());
         lzfLengthBuffer = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
     }
+
     final InputStream stream;
     final int fixedLen;
     final boolean hasVarFields;
@@ -53,12 +55,12 @@ class BufferedRecordReader {
     }
 
     private void readVariableRecord() throws IOException {
-        read(fixedLen+4);
-        var varLength = recordBuffer.getInt(recordBufferIndex-4);
-        if (fixedLen+4+varLength > recordBuffer.capacity()) {
-            var newLength = (fixedLen+4+varLength) * 2;
+        read(fixedLen + 4);
+        var varLength = recordBuffer.getInt(recordBufferIndex - 4);
+        if (fixedLen + 4 + varLength > recordBuffer.capacity()) {
+            var newLength = (fixedLen + 4 + varLength) * 2;
             var newBuffer = ByteBuffer.allocate(newLength).order(ByteOrder.LITTLE_ENDIAN);
-            System.arraycopy(recordBuffer.array(), 0, newBuffer.array(), 0, fixedLen+4);
+            System.arraycopy(recordBuffer.array(), 0, newBuffer.array(), 0, fixedLen + 4);
             recordBuffer = newBuffer;
         }
         read(varLength);
@@ -91,12 +93,12 @@ class BufferedRecordReader {
         return remainingLzf;
     }
 
-    private int readNextLzfBlock() throws IOException{
+    private int readNextLzfBlock() throws IOException {
         var lzfBlockLength = readLzfBlockLength();
-        var checkbit = (long)lzfBlockLength & 0x80000000L;
+        var checkbit = (long) lzfBlockLength & 0x80000000L;
         if (checkbit > 0) {
             lzfBlockLength &= 0x7ffffff;
-            return stream.readNBytes(lzfOut.array(),0, lzfBlockLength);
+            return stream.readNBytes(lzfOut.array(), 0, lzfBlockLength);
         } else {
             var readIn = stream.readNBytes(lzfIn.array(), 0, lzfBlockLength);
             return lzf.decompress(readIn);

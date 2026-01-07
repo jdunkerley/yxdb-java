@@ -1,10 +1,11 @@
-package com.tlarsendataguy.yxdb;
+package uk.co.jdunkerley.yxdb;
 
 class Lzf {
-    Lzf(byte[] inBuffer, byte[] outBuffer){
+    Lzf(byte[] inBuffer, byte[] outBuffer) {
         this.inBuffer = inBuffer;
         this.outBuffer = outBuffer;
     }
+
     byte[] inBuffer;
     byte[] outBuffer;
     int inIndex;
@@ -39,7 +40,7 @@ class Lzf {
     }
 
     private void copyByteSequence(int ctrl) throws IllegalArgumentException {
-        int len = ctrl+1;
+        int len = ctrl + 1;
         if (outIndex + len > outBuffer.length) {
             throw new IllegalArgumentException("output array is too small");
         }
@@ -57,7 +58,7 @@ class Lzf {
             inIndex++;
         }
 
-        if (outIndex +length+2 > outBuffer.length) {
+        if (outIndex + length + 2 > outBuffer.length) {
             throw new IllegalArgumentException("output array is too small");
         }
 

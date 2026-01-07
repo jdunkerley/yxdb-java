@@ -1,7 +1,7 @@
-package com.tlarsendataguy.yxdb;
+package uk.co.jdunkerley.yxdb;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class LzfTest {
     @Test
@@ -20,7 +20,7 @@ public class LzfTest {
         byte[] out = new byte[]{};
         Lzf lzf = new Lzf(in, out);
 
-        Assertions.assertThrows(IllegalArgumentException.class, ()->lzf.decompress(2));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> lzf.decompress(2));
     }
 
     @Test
@@ -58,22 +58,22 @@ public class LzfTest {
 
     @Test
     public void LargeControlValuesWithLengthOf7() {
-        byte[] in = new byte[]{8, 1, 2, 3, 4, 5, 6, 7, 8, 9, (byte)224, 1, 8};
+        byte[] in = new byte[]{8, 1, 2, 3, 4, 5, 6, 7, 8, 9, (byte) 224, 1, 8};
         byte[] out = new byte[19];
         Lzf lzf = new Lzf(in, out);
 
         int written = lzf.decompress(13);
         Assertions.assertEquals(19, written);
-        Assertions.assertArrayEquals(new byte[]{1,2,3,4,5,6,7,8,9,1,2,3,4,5,6,7,8,9,1}, out);
+        Assertions.assertArrayEquals(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1}, out);
     }
 
     @Test
     public void OutputArrayTooSmallForLargeControlValue() {
-        byte[] in = new byte[]{8, 1, 2, 3, 4, 5, 6, 7, 8, 9, (byte)224, 1, 8};
+        byte[] in = new byte[]{8, 1, 2, 3, 4, 5, 6, 7, 8, 9, (byte) 224, 1, 8};
         byte[] out = new byte[17];
         Lzf lzf = new Lzf(in, out);
 
-        Assertions.assertThrows(IllegalArgumentException.class, ()->lzf.decompress(13));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> lzf.decompress(13));
     }
 
     @Test

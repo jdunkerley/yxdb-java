@@ -1,4 +1,4 @@
-package com.tlarsendataguy.yxdb;
+package uk.co.jdunkerley.yxdb;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ public class BufferedRecordReaderTest {
 
     @Test
     public void TestVeryLongFieldFile() throws IOException {
-        var reader = generateReader("src/test/resources/VeryLongField.yxdb",6, true);
+        var reader = generateReader("src/test/resources/VeryLongField.yxdb", 6, true);
 
         int recordsRead = 0;
         while (reader.nextRecord()) {
@@ -40,6 +40,6 @@ public class BufferedRecordReaderTest {
         var metaInfoSize = header.getInt(80) * 2;
         var totalRecords = header.getLong(104);
         stream.skip(metaInfoSize);
-        return new BufferedRecordReader(stream,fixedLen, hasVarFields, totalRecords);
+        return new BufferedRecordReader(stream, fixedLen, hasVarFields, totalRecords);
     }
 }
