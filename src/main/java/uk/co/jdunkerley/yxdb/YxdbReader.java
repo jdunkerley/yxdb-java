@@ -1,17 +1,11 @@
 package uk.co.jdunkerley.yxdb;
 
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -20,17 +14,53 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.List;
 
 import static java.lang.Integer.parseInt;
 
 /**
  * YxdbReader contains the public interface for reading .yxdb files.
  * <p>
- * There are 2 constructors available for YxdbReader. One constructor takes a file path string and another
+ * There are 2 constructors available for YxdbReader.
+ *
+ * One constructor takes a file path string and another
  * takes an InputStream that reads yxdb-formatted bytes.
  */
-public class YxdbReader {
+public class YxdbReader implements AutoCloseable {
+    private final String path;
+    private final BufferedInputStream stream;
+
+    private final YxdbField[] fields;
+
+    private final YxdbRecord record;
+    private final BufferedRecordReader recordReader;
+
+    private final long numRecords;
+
+    private YxdbReader(String path, BufferedInputStream stream) throws IOException, IllegalArgumentException {
+        this.path = path;
+        this.stream = stream;
+
+        try {
+            var header = getHeader(stream);
+            numRecords = header.getLong(104);
+
+            var recordInfoNodes = getRecordInfoNodes(header, stream);
+            fields = getFields(recordInfoNodes);
+
+            record = YxdbRecord.newFromFieldList(fields);
+            recordReader = new BufferedRecordReader(stream, record.fixedSize, record.hasVar, numRecords);
+        }
+        catch (IOException | IllegalArgumentException ex) {
+            try {
+                stream.close();
+            }
+            catch (Exception _) {
+            }
+
+            throw ex;
+        }
+    }
+
     /**
      * Returns a reader that will parse the .yxdb file specified by the path argument.
      * <p>
@@ -45,11 +75,7 @@ public class YxdbReader {
      * @throws IOException              thrown when there are issues reading the file
      */
     public YxdbReader(String path) throws IOException, IllegalArgumentException {
-        this.path = path;
-        var file = new File(this.path);
-        stream = new BufferedInputStream(new FileInputStream(file));
-        fields = new ArrayList<>();
-        loadHeaderAndMetaInfo();
+        this(path, new BufferedInputStream(new FileInputStream(path)));
     }
 
     /**
@@ -66,35 +92,28 @@ public class YxdbReader {
      * @throws IOException thrown when there are issues reading the stream
      */
     public YxdbReader(BufferedInputStream stream) throws IOException, IllegalArgumentException {
-        path = "";
-        this.stream = stream;
-        fields = new ArrayList<>();
-        loadHeaderAndMetaInfo();
+        this("", stream);
     }
 
-    public long fileID;
-    public long creationDate;
+    /**
+     * @return the file path of the .yxdb file being read. If the reader was created from a stream, this will be an empty string.
+     */
+    public String path() {
+        return path;
+    }
 
     /**
-     * The total number of records in the .yxdb file.
+     * @return the total number of records in the .yxdb file.
      */
-    public long numRecords;
-    private int metaInfoSize;
-    /**
-     * Contains the raw XML metadata from the .yxdb file.
-     */
-    public String metaInfoStr;
-    private final List<YxdbField> fields;
-    private final BufferedInputStream stream;
-    private final String path;
-    private YxdbRecord record;
-    private BufferedRecordReader recordReader;
+    public long numRecords() {
+        return numRecords;
+    }
 
     /**
-     * @return the list of fields in the .yxdb file. The index of each field in this list matches the index of the field in the .yxdb file.
+     * @return an array of fields in the .yxdb file. The index of each field in this list matches the index of the field in the .yxdb file.
      */
-    public List<YxdbField> listFields() {
-        return record.fields;
+    public YxdbField[] fields() {
+        return fields;
     }
 
     /**
@@ -355,56 +374,59 @@ public class YxdbReader {
         return record.extractBlobFrom(name, recordReader.recordBuffer);
     }
 
-    private void loadHeaderAndMetaInfo() throws IOException, IllegalArgumentException {
-        var header = getHeader();
-
-        var fileType = new String(header.array(), 0, 64, StandardCharsets.ISO_8859_1).trim();
-        if ("Alteryx e2 Database file".equals(fileType)) {
-            throw closeStreamWithException("Reading AMP YXDB files is not supported.");
-        }
-        if (!fileType.startsWith("Alteryx Database File")) {
-            throw closeStreamWithException();
-        }
-
-        fileID = header.getLong(64);
-        creationDate = header.getLong(72);
-        numRecords = header.getLong(104);
-        metaInfoSize = header.getInt(80);
-
-        loadMetaInfo();
-
-        record = YxdbRecord.newFromFieldList(fields);
-        recordReader = new BufferedRecordReader(stream, record.fixedSize, record.hasVar, numRecords);
-    }
-
-    private void loadMetaInfo() throws IOException, IllegalArgumentException {
-        var metaInfoBytes = stream.readNBytes((metaInfoSize*2)-2); //YXDB strings are null-terminated, so exclude the last character
-        if (metaInfoBytes.length < (metaInfoSize*2)-2) {
-            throw closeStreamWithException();
-        }
-
-        var skipped = stream.skip(2);
-        if (skipped != 2) {
-            throw closeStreamWithException();
-        }
-
-        metaInfoStr = new String(metaInfoBytes, StandardCharsets.UTF_16LE);
-        getFields();
-    }
-
-    private ByteBuffer getHeader() throws IOException, IllegalArgumentException {
+    private static ByteBuffer getHeader(BufferedInputStream stream) throws IOException, IllegalArgumentException {
         var headerBytes = new byte[512];
 
         var written = stream.readNBytes(headerBytes,0, 512);
         if (written < 512) {
-            throw closeStreamWithException();
+            throw new IllegalArgumentException("File is not a valid YXDB file - invalid header.");
         }
 
-        return ByteBuffer.wrap(headerBytes).order(ByteOrder.LITTLE_ENDIAN);
+        var header = ByteBuffer.wrap(headerBytes).order(ByteOrder.LITTLE_ENDIAN);
+
+        // Check file type in header
+        var fileType = new String(header.array(), 0, 64, StandardCharsets.ISO_8859_1).trim();
+        if ("Alteryx e2 Database file".equals(fileType)) {
+            throw new IllegalArgumentException("Reading AMP YXDB files is not supported.");
+        }
+        if (!fileType.startsWith("Alteryx Database File")) {
+            throw new IllegalArgumentException("File is not a valid YXDB file - invalid file type.");
+        }
+
+        return header;
     }
 
-    private void getFields() throws IllegalArgumentException {
-        var nodes = getRecordInfoNodes();
+    private static NodeList getRecordInfoNodes(ByteBuffer header, BufferedInputStream stream) throws IOException, IllegalArgumentException {
+        int metaInfoSize = header.getInt(80);
+        int metaInfoByteLength = metaInfoSize * 2 - 2;
+
+        //YXDB strings are null-terminated, so exclude the last character
+        var metaInfoBytes = stream.readNBytes(metaInfoByteLength);
+        if (metaInfoBytes.length < metaInfoByteLength) {
+            throw new IllegalArgumentException("File is not a valid YXDB file - incomplete metadata.");
+        }
+
+        var skipped = stream.skip(2);
+        if (skipped != 2) {
+            throw new IllegalArgumentException("File is not a valid YXDB file - incomplete metadata.");
+        }
+
+        try {
+            var metaInfoString = new String(metaInfoBytes, StandardCharsets.UTF_16LE);
+
+            var builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            var doc = builder.parse(new InputSource(new StringReader(metaInfoString)));
+            doc.getDocumentElement().normalize();
+
+            var info = doc.getElementsByTagName("RecordInfo").item(0);
+            return info.getChildNodes();
+        } catch (Exception ex) {
+            throw new IllegalArgumentException(ex.getMessage());
+        }
+    }
+
+    private static YxdbField[] getFields(NodeList nodes) throws IllegalArgumentException {
+        var fields = new ArrayList<YxdbField>();
 
         int position = 0;
         for (int i = 0; i < nodes.getLength(); i++) {
@@ -417,29 +439,17 @@ public class YxdbReader {
             fields.add(newField);
             position = newField.endPosition();
         }
+
+        return fields.toArray(new YxdbField[0]);
     }
 
-    private NodeList getRecordInfoNodes() {
-        Document doc;
-        try {
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            doc = builder.parse(new InputSource(new StringReader(metaInfoStr)));
-            doc.getDocumentElement().normalize();
-        } catch (Exception ex) {
-            throw closeStreamWithException();
-        }
-
-        var info = doc.getElementsByTagName("RecordInfo").item(0);
-        return info.getChildNodes();
-    }
-
-    private YxdbField parseField(int index, int position, Node field) {
+    private static YxdbField parseField(int index, int position, Node field) throws IllegalArgumentException {
         var attributes = field.getAttributes();
 
         var name = attributes.getNamedItem("name");
         var type = attributes.getNamedItem("type");
         if (name == null || type == null) {
-            throw closeStreamWithException();
+            throw new IllegalArgumentException("Field is missing required attributes: name and/or type.");
         }
 
         var nameStr = name.getNodeValue();
@@ -450,22 +460,18 @@ public class YxdbReader {
         var description = attributes.getNamedItem("description");
         var descriptionStr = description != null ? description.getNodeValue() : null;
 
-        try {
-            return YxdbField.makeField(
-                    index,
-                    position,
-                    nameStr,
-                    typeStr,
-                    sourceStr,
-                    descriptionStr,
-                    () -> parseIntFromNode(field, "size", nameStr),
-                    () -> parseIntFromNode(field, "scale", nameStr));
-        } catch (IllegalArgumentException ex) {
-            throw closeStreamWithException(ex.getMessage());
-        }
+        return YxdbField.makeField(
+                index,
+                position,
+                nameStr,
+                typeStr,
+                sourceStr,
+                descriptionStr,
+                () -> parseIntFromNode(field, "size", nameStr),
+                () -> parseIntFromNode(field, "scale", nameStr));
     }
 
-    private int parseIntFromNode(Node node, String attributeName, String fieldName) {
+    private static int parseIntFromNode(Node node, String attributeName, String fieldName) throws IllegalArgumentException {
         var attribute = node.getAttributes().getNamedItem(attributeName);
         if (attribute == null) {
             throw new IllegalArgumentException("Field " + fieldName + " is missing required attribute: " + attributeName);
@@ -476,19 +482,5 @@ public class YxdbReader {
         } catch (NumberFormatException ex) {
             throw new IllegalArgumentException("Field " + fieldName + " has invalid integer value for attribute: " + attributeName);
         }
-    }
-
-    private IllegalArgumentException closeStreamWithException() {
-        return closeStreamWithException("File is not a valid YXDB file.");
-    }
-
-    private IllegalArgumentException closeStreamWithException(String message) {
-        try {
-            stream.close();
-        }
-        catch (Exception _) {
-        }
-
-        return new IllegalArgumentException(message);
     }
 }

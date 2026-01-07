@@ -16,10 +16,8 @@ public class YxdbReaderTest {
     public void TestGetReader() throws IOException, ParseException {
         var path = "src/test/resources/AllNormalFields.yxdb";
         var yxdb = new YxdbReader(path);
-        Assertions.assertEquals(1, yxdb.numRecords);
-        Assertions.assertNotNull(yxdb.metaInfoStr);
-        Assertions.assertEquals(AllNormalFieldsMetaXml, yxdb.metaInfoStr);
-        Assertions.assertEquals(16, yxdb.listFields().size());
+        Assertions.assertEquals(1, yxdb.numRecords());
+        Assertions.assertEquals(16, yxdb.fields().length);
 
         int read = 0;
         while (yxdb.next()) {
@@ -174,7 +172,7 @@ public class YxdbReaderTest {
             new YxdbReader("src/test/resources/invalid.txt");
         } catch (Exception ex) {
             var msg = ex.getMessage();
-            Assertions.assertEquals("File is not a valid YXDB file.", msg);
+            Assertions.assertEquals("File is not a valid YXDB file - invalid file type.", msg);
             ex.printStackTrace();
         }
     }
@@ -185,7 +183,7 @@ public class YxdbReaderTest {
             new YxdbReader("src/test/resources/invalidSmall.txt");
         } catch (Exception ex) {
             var msg = ex.getMessage();
-            Assertions.assertEquals("File is not a valid YXDB file.", msg);
+            Assertions.assertEquals("File is not a valid YXDB file - invalid header.", msg);
             ex.printStackTrace();
         }
     }

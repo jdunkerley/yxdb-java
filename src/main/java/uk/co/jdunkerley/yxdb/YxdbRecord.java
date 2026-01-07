@@ -28,8 +28,8 @@ class YxdbRecord {
         nameToIndex.put(field.name(), field.index());
     }
 
-    static YxdbRecord newFromFieldList(List<YxdbField> fields) throws IllegalArgumentException {
-        YxdbRecord record = new YxdbRecord(fields.size());
+    static YxdbRecord newFromFieldList(YxdbField[] fields) throws IllegalArgumentException {
+        YxdbRecord record = new YxdbRecord(fields.length);
         int lastRecord = 0;
         for (YxdbField field: fields) {
             record.addFieldNameToIndexMap(field);

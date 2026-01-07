@@ -10,7 +10,6 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 
 public class YxdbRecordTest {
     @Test
@@ -220,8 +219,7 @@ public class YxdbRecordTest {
 
     private static YxdbRecord loadRecordWithValueColumn(String type, int size) {
         var field = new YxdbField(0, 0, "value", type, size, 0, "SOURCE", "DESCRIPTION");
-        var fields = new ArrayList<YxdbField>(1);
-        fields.add(field);
+        var fields = new YxdbField[] { field };
         return YxdbRecord.newFromFieldList(fields);
     }
 
