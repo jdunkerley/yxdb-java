@@ -20,7 +20,7 @@ final class YxdbRecord {
 
         hasVar = false;
         nameToIndex = new HashMap<>(fields.length);
-        for (YxdbField field: fields) {
+        for (YxdbField field : fields) {
             nameToIndex.put(field.name(), field.index());
             hasVar = hasVar || field.isVariableLength();
         }
@@ -61,7 +61,8 @@ final class YxdbRecord {
             case YxdbType.INT16 -> Extractors.extractInt16(buffer, yxdbField.startPosition());
             case YxdbType.INT32 -> Extractors.extractInt32(buffer, yxdbField.startPosition());
             case YxdbType.INT64 -> Extractors.extractInt64(buffer, yxdbField.startPosition());
-            default -> throw new IllegalArgumentException("Field at index " + index + " has invalid byteSize for long integer extraction");
+            default ->
+                    throw new IllegalArgumentException("Field at index " + index + " has invalid byteSize for long integer extraction");
         };
     }
 
@@ -73,7 +74,8 @@ final class YxdbRecord {
         return switch (yxdbField.yxdbType()) {
             case YxdbType.FLOAT -> Extractors.extractFloat(buffer, yxdbField.startPosition());
             case YxdbType.DOUBLE -> Extractors.extractDouble(buffer, yxdbField.startPosition());
-            default -> throw new IllegalArgumentException("Field at index " + index + " has invalid byteSize for double extraction");
+            default ->
+                    throw new IllegalArgumentException("Field at index " + index + " has invalid byteSize for double extraction");
         };
     }
 
@@ -88,11 +90,13 @@ final class YxdbRecord {
     String extractStringFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
         return switch (yxdbField.yxdbType()) {
-            case YxdbType.STRING, YxdbType.DATE, YxdbType.TIME, YxdbType.DATETIME, YxdbType.DECIMAL -> Extractors.extractString(buffer, yxdbField.startPosition(), yxdbField.size());
+            case YxdbType.STRING, YxdbType.DATE, YxdbType.TIME, YxdbType.DATETIME, YxdbType.DECIMAL ->
+                    Extractors.extractString(buffer, yxdbField.startPosition(), yxdbField.size());
             case YxdbType.WSTRING -> Extractors.extractWString(buffer, yxdbField.startPosition(), yxdbField.size());
             case YxdbType.V_STRING -> Extractors.extractVString(buffer, yxdbField.startPosition());
             case YxdbType.V_WSTRING -> Extractors.extractVWString(buffer, yxdbField.startPosition());
-            default -> throw newInvalidIndex(index, "string / wstring / v_string / v_wstring / date / time / datetime / decimal");
+            default ->
+                    throw newInvalidIndex(index, "string / wstring / v_string / v_wstring / date / time / datetime / decimal");
         };
     }
 

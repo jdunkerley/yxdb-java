@@ -1,6 +1,8 @@
 package uk.co.jdunkerley.yxdb;
 
-/** Constants for the Alteryx YXDB file format data types. */
+/**
+ * Constants for the Alteryx YXDB file format data types.
+ */
 final class YxdbType {
     static final String BOOLEAN = "Bool";
     static final String BYTE = "Byte";

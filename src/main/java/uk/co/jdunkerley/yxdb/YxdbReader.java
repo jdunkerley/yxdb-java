@@ -24,7 +24,7 @@ import static java.lang.Integer.parseInt;
  * YxdbReader contains the public interface for reading .yxdb files.
  * <p>
  * There are 2 constructors available for YxdbReader.
- *
+ * <p>
  * One constructor takes a file path string and another
  * takes an InputStream that reads yxdb-formatted bytes.
  */
@@ -52,12 +52,10 @@ public class YxdbReader implements AutoCloseable {
 
             record = new YxdbRecord(fields);
             recordReader = new BufferedRecordReader(stream, record.fixedSize, record.hasVar, numRecords);
-        }
-        catch (IOException | IllegalArgumentException ex) {
+        } catch (IOException | IllegalArgumentException ex) {
             try {
                 stream.close();
-            }
-            catch (Exception _) {
+            } catch (Exception _) {
             }
 
             throw ex;
@@ -73,7 +71,7 @@ public class YxdbReader implements AutoCloseable {
      * <p>
      * The reader's stream can be closed early by calling the close() method. If the file is read to the end (i.e. next() returns false), the stream is automatically closed.
      *
-     * @param path                      the path to a .yxdb file
+     * @param path the path to a .yxdb file
      * @throws IllegalArgumentException thrown when the provided file path does not exist or is not a valid YXDB file
      * @throws IOException              thrown when there are issues reading the file
      */
@@ -90,9 +88,9 @@ public class YxdbReader implements AutoCloseable {
      * <p>
      * The reader's stream can be closed early by calling the close() method. If the file is read to the end (i.e. next() returns false), the stream is automatically closed.
      *
-     * @param stream       an InputStream for a .yxdb-formatted stream of bytes
+     * @param stream an InputStream for a .yxdb-formatted stream of bytes
      * @throws IllegalArgumentException thrown when the stream does not contain a valid YXDB file
-     * @throws IOException thrown when there are issues reading the stream
+     * @throws IOException              thrown when there are issues reading the stream
      */
     public YxdbReader(BufferedInputStream stream) throws IOException, IllegalArgumentException {
         this("", stream);
@@ -135,11 +133,11 @@ public class YxdbReader implements AutoCloseable {
      * <p>
      * <code>
      * while (reader.next()) {
-     *     // do something
+     * // do something
      * }
      * </code>
      *
-     * @return             true, if the next record was loaded, and false, if the end of the file was reached
+     * @return true, if the next record was loaded, and false, if the end of the file was reached
      * @throws IOException thrown when there is an error reading the next record
      */
     public boolean next() throws IOException {
@@ -148,7 +146,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the byte field at the specified index. May be null
      * @throws IllegalArgumentException thrown when the index is out of range
      */
@@ -164,13 +163,15 @@ public class YxdbReader implements AutoCloseable {
             case DATE -> readDate(index);
             case TIME -> readTime(index);
             case DATETIME -> readDateTime(index);
-            case BLOB -> (yxdbField.yxdbType().equals(YxdbType.SPATIAL_OBJ) ? Spatial.ToGeoJson(readBlob(index)) : readBlob(index));
+            case BLOB ->
+                    (yxdbField.yxdbType().equals(YxdbType.SPATIAL_OBJ) ? Spatial.ToGeoJson(readBlob(index)) : readBlob(index));
         };
     }
 
     /**
      * Reads a field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified byte field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist
      */
@@ -180,7 +181,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a byte field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the byte field at the specified index. May be null
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a byte field
      */
@@ -190,7 +192,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a byte field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified byte field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a byte field
      */
@@ -200,7 +203,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a boolean field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the boolean field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a boolean field
      */
@@ -210,7 +214,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a boolean field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified boolean field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a boolean field
      */
@@ -220,7 +225,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads an integer field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the long integer field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a long integer field
      */
@@ -230,7 +236,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads an integer field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified long integer field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a long integer field
      */
@@ -240,7 +247,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a floating point field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the numeric field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a numeric field
      */
@@ -250,7 +258,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a floating point field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified numeric field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a numeric field
      */
@@ -260,7 +269,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a fixed decimal field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the numeric field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a numeric field
      */
@@ -270,7 +280,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a fixed decimal field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified numeric field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a numeric field
      */
@@ -280,7 +291,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a text field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the text field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a text field
      */
@@ -290,7 +302,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a text field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified text field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a text field
      */
@@ -300,7 +313,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a date field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the date/datetime field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a date/datetime field
      */
@@ -310,7 +324,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a date field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified date/datetime field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a date field
      */
@@ -320,7 +335,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a time field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the date/datetime field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a date/datetime field
      */
@@ -330,7 +346,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a time field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified date/datetime field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a date field
      */
@@ -340,7 +357,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a datetime field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the date/datetime field at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a date/datetime field
      */
@@ -350,7 +368,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a datetime field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified date/datetime field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a date field
      */
@@ -360,7 +379,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a blob field from the .yxdb file
-     * @param  index the index of the field to read, starting at 0
+     *
+     * @param index the index of the field to read, starting at 0
      * @return the value of the blob field, as an array of bytes, at the specified index. May be null.
      * @throws IllegalArgumentException thrown when the index is out of range or the field at the specified index is not a blob field
      */
@@ -370,7 +390,8 @@ public class YxdbReader implements AutoCloseable {
 
     /**
      * Reads a blob field from the .yxdb file
-     * @param  name the name of the field to read
+     *
+     * @param name the name of the field to read
      * @return the value of the specified blob field, as an array of bytes. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist or is not a blob field
      */
@@ -381,7 +402,7 @@ public class YxdbReader implements AutoCloseable {
     private static ByteBuffer getHeader(BufferedInputStream stream) throws IOException, IllegalArgumentException {
         var headerBytes = new byte[512];
 
-        var written = stream.readNBytes(headerBytes,0, 512);
+        var written = stream.readNBytes(headerBytes, 0, 512);
         if (written < 512) {
             throw new IllegalArgumentException("File is not a valid YXDB file - invalid header.");
         }

@@ -7,148 +7,103 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 
 class Extractors {
-    private static final DateTimeFormatter time = DateTimeFormatter.ISO_LOCAL_TIME;
-    private static final DateTimeFormatter date = DateTimeFormatter.ISO_LOCAL_DATE;
     private static final DateTimeFormatter dateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     static Boolean extractBoolean(ByteBuffer buffer, int start) {
         var value = buffer.get(start);
-        if (value == 2) {
-            return null;
-        }
-        return buffer.get(start) == 1;
+        return switch (value) {
+            case 1 -> true;
+            case 2 -> null;
+            default -> false;
+        };
     }
 
     static Byte extractByte(ByteBuffer buffer, int start) {
-        if (buffer.get(start+1) == 1) {
-            return null;
-        }
-        return buffer.get(start);
+        return buffer.get(start + 1) == 1 ? null : buffer.get(start);
     }
 
     static Long extractInt16(ByteBuffer buffer, int start) {
-        if (buffer.get(start + 2) == 1) {
-            return null;
-        }
-        return (long)buffer.getShort(start);
+        return buffer.get(start + 2) == 1 ? null : (long) buffer.getShort(start);
     }
 
     static Long extractInt32(ByteBuffer buffer, int start) {
-        if (buffer.get(start + 4) == 1) {
-            return null;
-        }
-        return (long)buffer.getInt(start);
+        return buffer.get(start + 4) == 1 ? null : (long) buffer.getInt(start);
     }
 
     static Long extractInt64(ByteBuffer buffer, int start) {
-        if (buffer.get(start + 8) == 1) {
-            return null;
-        }
-        return buffer.getLong(start);
+        return buffer.get(start + 8) == 1 ? null : (long) buffer.getLong(start);
     }
 
     static Double extractFloat(ByteBuffer buffer, int start) {
-        if (buffer.get(start+4) == 1) {
-            return null;
-        }
-        return (double)buffer.getFloat(start);
+        return buffer.get(start + 4) == 1 ? null : (double) buffer.getFloat(start);
     }
 
     static Double extractDouble(ByteBuffer buffer, int start) {
-        if (buffer.get(start+8) == 1) {
-            return null;
-        }
-        return buffer.getDouble(start);
+        return buffer.get(start + 8) == 1 ? null : buffer.getDouble(start);
     }
 
     static BigDecimal extractFixedDecimal(ByteBuffer buffer, int start, int fieldLength) {
-        if (buffer.get(start + fieldLength) == 1){
-            return null;
-        }
-        var str = getString(buffer, start, fieldLength, 1);
-        return new BigDecimal(str);
+        var str = extractString(buffer, start, fieldLength);
+        return str == null ? null : new BigDecimal(str);
     }
 
     static LocalTime extractTime(ByteBuffer buffer, int start) {
-        if (buffer.get(start+8) == 1) {
-            return null;
-        }
-
-        var str = new String(buffer.array(), start, 8, StandardCharsets.ISO_8859_1);
-        try {
-            return LocalTime.parse(str, time);
-        } catch (DateTimeParseException ex) {
-            return null;
-        }
+        var str = extractString(buffer, start, 8);
+        return str == null ? null : LocalTime.parse(str, DateTimeFormatter.ISO_LOCAL_TIME);
     }
 
     static LocalDate extractDate(ByteBuffer buffer, int start) {
-        if (buffer.get(start+10) == 1) {
-            return null;
-        }
-        var str = new String(buffer.array(), start, 10, StandardCharsets.ISO_8859_1);
-        try {
-            return LocalDate.parse(str, date);
-        } catch (DateTimeParseException ex) {
-            return null;
-        }
+        var str = extractString(buffer, start, 10);
+        return str == null ? null : LocalDate.parse(str, DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
     static LocalDateTime extractDateTime(ByteBuffer buffer, int start) {
-        if (buffer.get(start+19) == 1) {
-            return null;
-        }
-        var str = new String(buffer.array(), start, 19, StandardCharsets.ISO_8859_1);
-        try {
-            return LocalDateTime.parse(str, dateTime);
-        } catch (DateTimeParseException ex) {
-            return null;
-        }
+        var str = extractString(buffer, start, 19);
+        return str == null ? null : LocalDateTime.parse(str, dateTime);
     }
 
     static String extractString(ByteBuffer buffer, int start, int fieldLength) {
-        if (buffer.get(start+fieldLength) == 1) {
-            return null;
-        }
         return getString(buffer, start, fieldLength, 1);
     }
 
     static String extractWString(ByteBuffer buffer, int start, int fieldLength) {
-        if (buffer.get(start + (fieldLength * 2)) == 1) {
-            return null;
-        }
         return getString(buffer, start, fieldLength, 2);
     }
 
-    static String extractVString(ByteBuffer buffer, int start) {
-        var bytes = parseBlob(buffer, start);
-        if (bytes == null) {
+    private static String getString(ByteBuffer buffer, int start, int fieldLength, int charSize) {
+        if (buffer.get(start + (fieldLength * charSize)) == 1) {
             return null;
         }
-        return new String(bytes, StandardCharsets.ISO_8859_1);
+
+        // Find the position of the null terminator
+        int endChar = 0;
+        while (endChar < fieldLength && (buffer.get(start + (endChar * charSize)) != 0 || (charSize == 2 && buffer.get(start + (endChar * charSize) + 1) != 0))) {
+            endChar++;
+        }
+
+        return new String(Arrays.copyOfRange(buffer.array(), start, endChar * charSize + start), charSize == 1 ? StandardCharsets.ISO_8859_1 : StandardCharsets.UTF_16LE);
+    }
+
+    static String extractVString(ByteBuffer buffer, int start) {
+        var bytes = extractBlob(buffer, start);
+        return bytes == null ? null : new String(bytes, StandardCharsets.ISO_8859_1);
     }
 
     static String extractVWString(ByteBuffer buffer, int start) {
-        var bytes = parseBlob(buffer, start);
-        if (bytes == null) {
-            return null;
-        }
-        return new String(bytes, StandardCharsets.UTF_16LE);
+        var bytes = extractBlob(buffer, start);
+        return bytes == null ? null : new String(bytes, StandardCharsets.UTF_16LE);
     }
 
     static byte[] extractBlob(ByteBuffer buffer, int start) {
-        return parseBlob(buffer, start);
-    }
-
-    private static byte[] parseBlob(ByteBuffer buffer, int start) {
         var fixedPortion = buffer.getInt(start);
+
         if (fixedPortion == 0) {
-            return new byte[]{};
+            return new byte[0];
         }
+
         if (fixedPortion == 1) {
             return null;
         }
@@ -159,30 +114,9 @@ class Extractors {
 
         var blockStart = start + (fixedPortion & 0x7fffffff);
         var blockFirstByte = buffer.get(blockStart);
-        if (isSmallBlock(blockFirstByte)) {
-            return getSmallBlob(buffer, blockStart);
-        }
-        return getNormalBlob(buffer, blockStart);
-    }
-
-    private static String getString(ByteBuffer buffer, int start, int fieldLength, int charSize) {
-        int end = getEndOfStringPos(buffer.array(), start, fieldLength, charSize);
-        if (charSize == 1) {
-            return new String(Arrays.copyOfRange(buffer.array(), start, end), StandardCharsets.ISO_8859_1);
-        }
-        return new String(Arrays.copyOfRange(buffer.array(), start, end), StandardCharsets.UTF_16LE);
-    }
-
-    private static int getEndOfStringPos(byte[] buffer, int start, int fieldLength, int charSize) {
-        int fieldTo = start + (fieldLength * charSize);
-        int strLen = 0;
-        for (var i = start; i < fieldTo; i=i+charSize) {
-            if (buffer[i] == 0 && buffer[i+(charSize-1)] == 0) {
-                break;
-            }
-            strLen++;
-        }
-        return start+(strLen * charSize);
+        return isSmallBlock(blockFirstByte)
+                ? getSmallBlob(buffer, blockStart)
+                : getNormalBlob(buffer, blockStart);
     }
 
     private static boolean isTiny(int fixedPortion) {

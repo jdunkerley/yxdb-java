@@ -3,7 +3,8 @@ package uk.co.jdunkerley.yxdb;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Spatial contains a static function to translate SpatialObj fields into GeoJSON.
@@ -15,6 +16,7 @@ public class Spatial {
      * ToGeoJson translates SpatialObj fields into GeoJSON.
      * <p>
      * Alteryx stores spatial objects in a binary format. This function reads the binary format and converts it to a GeoJSON string.
+     *
      * @param value The object read from a SpatialObj field
      * @return A GeoJSON string representing the spatial object
      * @throws IllegalArgumentException The blob is not a valid spatial object
@@ -102,7 +104,7 @@ public class Spatial {
 
     private static int[] GetEndingIndices(ByteBuffer value) {
         var totalObjects = value.getInt(36);
-        var totalPoints = (int)value.getLong(40);
+        var totalPoints = (int) value.getLong(40);
         var endingIndices = new int[totalObjects];
 
         var i = 48;
@@ -110,16 +112,16 @@ public class Spatial {
         for (var j = 1; j < totalObjects; j++) {
             var endingPoint = value.getInt(i);
             var endingIndex = (endingPoint * BytesPerPoint) + startAt;
-            endingIndices[j-1] = endingIndex;
+            endingIndices[j - 1] = endingIndex;
             i += 4;
         }
-        endingIndices[totalObjects-1] = (totalPoints*BytesPerPoint)+startAt;
+        endingIndices[totalObjects - 1] = (totalPoints * BytesPerPoint) + startAt;
         return endingIndices;
     }
 
     private static double[] GetCoordAt(ByteBuffer value, int at) {
         var lng = value.getDouble(at);
-        var lat = value.getDouble(at+8);
+        var lat = value.getDouble(at + 8);
         return new double[]{lng, lat};
     }
 
