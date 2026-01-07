@@ -98,6 +98,7 @@ public class YxdbRecordTest {
         Assertions.assertEquals("value", record.fields[0].name());
         Assertions.assertEquals(0, record.mapName("value"));
         Assertions.assertEquals(new BigDecimal("123.45"), record.extractDecimalFrom(0, source));
+        Assertions.assertEquals("123.45", record.extractStringFrom(0, source));
         Assertions.assertEquals(11, record.fixedSize);
         Assertions.assertFalse(record.hasVar);
     }
@@ -179,6 +180,7 @@ public class YxdbRecordTest {
         Assertions.assertSame(DataType.DATE, record.fields[0].dataType());
         Assertions.assertEquals("value", record.fields[0].name());
         Assertions.assertEquals(expected, record.extractDateFrom(0, source));
+        Assertions.assertEquals("2021-01-01", record.extractStringFrom(0, source));
         Assertions.assertEquals(11, record.fixedSize);
         Assertions.assertFalse(record.hasVar);
     }
@@ -190,7 +192,11 @@ public class YxdbRecordTest {
 
         var expected = LocalTime.of(3, 4, 5);
 
+        Assertions.assertEquals(1, record.fields.length);
+        Assertions.assertSame(DataType.TIME, record.fields[0].dataType());
+        Assertions.assertEquals("value", record.fields[0].name());
         Assertions.assertEquals(expected, record.extractTimeFrom(0, source));
+        Assertions.assertEquals("03:04:05", record.extractStringFrom(0, source));
         Assertions.assertEquals(9, record.fixedSize);
         Assertions.assertFalse(record.hasVar);
     }
@@ -202,7 +208,11 @@ public class YxdbRecordTest {
 
         var expected = LocalDateTime.of(2021, 1, 2, 3, 4, 5);
 
+        Assertions.assertEquals(1, record.fields.length);
+        Assertions.assertSame(DataType.DATETIME, record.fields[0].dataType());
+        Assertions.assertEquals("value", record.fields[0].name());
         Assertions.assertEquals(expected, record.extractDateTimeFrom(0, source));
+        Assertions.assertEquals("2021-01-02 03:04:05", record.extractStringFrom(0, source));
         Assertions.assertEquals(20, record.fixedSize);
         Assertions.assertFalse(record.hasVar);
     }

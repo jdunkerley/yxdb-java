@@ -39,7 +39,7 @@ final class YxdbRecord {
     Boolean extractBooleanFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.BOOLEAN) {
-            throwInvalidIndex(index, "boolean");
+            throw newInvalidIndex(index, "boolean");
         }
         return Extractors.extractBoolean(buffer, yxdbField.startPosition());
     }
@@ -47,7 +47,7 @@ final class YxdbRecord {
     Byte extractByteFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.BYTE) {
-            throwInvalidIndex(index, "byte");
+            throw newInvalidIndex(index, "byte");
         }
         return Extractors.extractByte(buffer, yxdbField.startPosition());
     }
@@ -55,7 +55,7 @@ final class YxdbRecord {
     Long extractLongFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.LONG) {
-            throwInvalidIndex(index, "int16 / int32 / int64");
+            throw newInvalidIndex(index, "int16 / int32 / int64");
         }
         return switch (yxdbField.yxdbType()) {
             case YxdbType.INT16 -> Extractors.extractInt16(buffer, yxdbField.startPosition());
@@ -68,7 +68,7 @@ final class YxdbRecord {
     Double extractDoubleFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.DOUBLE) {
-            throwInvalidIndex(index, "float / double");
+            throw newInvalidIndex(index, "float / double");
         }
         return switch (yxdbField.yxdbType()) {
             case YxdbType.FLOAT -> Extractors.extractFloat(buffer, yxdbField.startPosition());
@@ -80,29 +80,26 @@ final class YxdbRecord {
     BigDecimal extractDecimalFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.DECIMAL) {
-            throwInvalidIndex(index, "fixeddecimal");
+            throw newInvalidIndex(index, "fixeddecimal");
         }
         return Extractors.extractFixedDecimal(buffer, yxdbField.startPosition(), yxdbField.size());
     }
 
     String extractStringFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
-        if (yxdbField.dataType() != DataType.STRING) {
-            throwInvalidIndex(index, "string / wstring / v_string / v_wstring");
-        }
         return switch (yxdbField.yxdbType()) {
-            case YxdbType.STRING -> Extractors.extractString(buffer, yxdbField.startPosition(), yxdbField.size());
+            case YxdbType.STRING, YxdbType.DATE, YxdbType.TIME, YxdbType.DATETIME, YxdbType.DECIMAL -> Extractors.extractString(buffer, yxdbField.startPosition(), yxdbField.size());
             case YxdbType.WSTRING -> Extractors.extractWString(buffer, yxdbField.startPosition(), yxdbField.size());
             case YxdbType.V_STRING -> Extractors.extractVString(buffer, yxdbField.startPosition());
             case YxdbType.V_WSTRING -> Extractors.extractVWString(buffer, yxdbField.startPosition());
-            default -> throw new IllegalArgumentException("Field at index " + index + " has invalid yxdbType for string extraction");
+            default -> throw newInvalidIndex(index, "string / wstring / v_string / v_wstring / date / time / datetime / decimal");
         };
     }
 
     LocalDate extractDateFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.DATE) {
-            throwInvalidIndex(index, "date");
+            throw newInvalidIndex(index, "date");
         }
         return Extractors.extractDate(buffer, yxdbField.startPosition());
     }
@@ -110,7 +107,7 @@ final class YxdbRecord {
     LocalTime extractTimeFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.TIME) {
-            throwInvalidIndex(index, "time");
+            throw newInvalidIndex(index, "time");
         }
         return Extractors.extractTime(buffer, yxdbField.startPosition());
     }
@@ -118,7 +115,7 @@ final class YxdbRecord {
     LocalDateTime extractDateTimeFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.DATETIME) {
-            throwInvalidIndex(index, "datetime");
+            throw newInvalidIndex(index, "datetime");
         }
         return Extractors.extractDateTime(buffer, yxdbField.startPosition());
     }
@@ -126,12 +123,12 @@ final class YxdbRecord {
     byte[] extractBlobFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.BLOB) {
-            throwInvalidIndex(index, "blob / spatial");
+            throw newInvalidIndex(index, "blob / spatial");
         }
         return Extractors.extractBlob(buffer, yxdbField.startPosition());
     }
 
-    private static void throwInvalidIndex(int index, String expectedType) throws IllegalArgumentException {
-        throw new IllegalArgumentException("index " + index + " is not a valid index or is not a " + expectedType + " field");
+    private static IllegalArgumentException newInvalidIndex(int index, String expectedType) throws IllegalArgumentException {
+        return new IllegalArgumentException("index " + index + " is not a valid index or is not a " + expectedType + " field");
     }
 }
