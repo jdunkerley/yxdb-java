@@ -91,6 +91,7 @@ public class YxdbReader implements AutoCloseable {
     }
 
     /**
+     * The total number of records in the .yxdb file.
      * @return the total number of records in the .yxdb file.
      */
     public long numRecords() {
@@ -98,7 +99,9 @@ public class YxdbReader implements AutoCloseable {
     }
 
     /**
-     * @return an array of fields in the .yxdb file. The index of each field in this list matches the index of the field in the .yxdb file.
+     * An array of fields in the .yxdb file.
+     * The index of each field in this list matches the index of the field in the .yxdb file.
+     * @return an array of fields in the .yxdb file.
      */
     public YxdbField[] fields() {
         return fields;
