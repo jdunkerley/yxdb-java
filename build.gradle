@@ -1,9 +1,7 @@
 plugins {
     id 'java'
+    id 'com.vanniktech.maven.publish' version '0.35.0'
 }
-
-group 'com.tlarsendataguy'
-version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -16,4 +14,33 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+mavenPublishing {
+    coordinates('uk.co.jdunkerley', 'yxdb-java', '0.1.0')
+
+    pom {
+        name = "yxdb-java"
+        description = "Java library for reading data from Alteryx YXDB files."
+        inceptionYear = "2022"
+        url = 'https://github.com/jdunkerley/yxdb-java'
+        licenses {
+            license {
+                name = 'MIT License'
+                url = 'https://github.com/jdunkerley/yxdb-java/blob/main/LICENSE'
+            }
+        }
+        developers {
+            developer {
+                id = getProperty('user.id')
+                name = getProperty('user.name')
+                email = getProperty('user.email')
+            }
+        }
+        scm {
+            connection = 'scm:git:git://github.com/jdunkerley/yxdb-java.git'
+            developerConnection = 'scm:git:ssh://github.com:jdunkerley/yxdb-java.git'
+            url = 'https://github.com/jdunkerley/yxdb-java'
+        }
+    }
 }
