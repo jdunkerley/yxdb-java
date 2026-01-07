@@ -139,6 +139,10 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the index is out of range
      */
     public Object read(int index) throws IllegalArgumentException {
+        if (index < 0 || index >= fields.length) {
+            throw new IllegalArgumentException("The index " + index + " is out of range.");
+        }
+
         var yxdbField = fields[index];
         return switch (yxdbField.dataType()) {
             case BOOLEAN -> readBoolean(index);
@@ -151,7 +155,7 @@ public class YxdbReader implements AutoCloseable {
             case TIME -> readTime(index);
             case DATETIME -> readDateTime(index);
             case BLOB ->
-                    (yxdbField.yxdbType().equals(YxdbType.SPATIAL_OBJ) ? Spatial.ToGeoJson(readBlob(index)) : readBlob(index));
+                    (yxdbField.yxdbType().equals(YxdbType.SPATIAL_OBJ) ? Spatial.toGeoJson(readBlob(index)) : readBlob(index));
         };
     }
 

@@ -14,7 +14,7 @@ Instantiate YxdbReader using one of the two constructors:
 
 Iterate through the records in the file using the `next()` method in a while loop:
 
-```java
+```
 while (reader.next()) {
     // do something
 }
@@ -22,7 +22,7 @@ while (reader.next()) {
 
 The reader implements `AutoCloseable` so it can be used in a try-with-resources block:
 
-```java
+```
 try (YxdbReader reader = new YxdbReader("path/to/file.yxdb")) {
     while (reader.next()) {
         // do something
@@ -44,7 +44,7 @@ Fields can be access via the `readX()` methods on the YxdbReader class. There ar
 * `readString(int index)`, `readString(String name)` - read String, WString, V_String, and V_WString fields. You can also read Time, Date, DateTime and FixedDecimal fields as strings using this method.
 
 If either the index number or field name is invalid, the read methods will throw an `IllegalArgumentException`.
+To read spatial objects, use the `yxdb.Spatial.toGeoJson()` function. The `ToGeoJson()` function translates the binary SpatialObj format into a GeoJSON string.
 
-For convenience, there is also a generic `read(int index)` and `read(String name)` method that returns an `Object`. The returned object will be of the appropriate Java type for the field.
+For convenience, there is also a generic `read(int index)` and `read(String name)` method that returns an `Object`. The returned object will be of the appropriate Java type for the field. Spatial objects will be converted to GeoJSON strings in this method.
 
-To read spatial objects, use the `yxdb.Spatial.ToGeoJson()` function. The `ToGeoJson()` function translates the binary SpatialObj format into a GeoJSON string.

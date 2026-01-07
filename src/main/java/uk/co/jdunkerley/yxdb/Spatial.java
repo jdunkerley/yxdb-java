@@ -1,6 +1,5 @@
 package uk.co.jdunkerley.yxdb;
 
-
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -12,6 +11,8 @@ import java.util.List;
 public class Spatial {
     final static private int BytesPerPoint = 16;
 
+    private record Point(double lng, double lat) {}
+
     /**
      * ToGeoJson translates SpatialObj fields into GeoJSON.
      * <p>
@@ -21,80 +22,69 @@ public class Spatial {
      * @return A GeoJSON string representing the spatial object
      * @throws IllegalArgumentException The blob is not a valid spatial object
      */
-    public static String ToGeoJson(byte[] value) throws IllegalArgumentException {
+    public static String toGeoJson(byte[] value) throws IllegalArgumentException {
         if (value == null) {
             return "";
         }
+
         if (value.length < 20) {
             throw new IllegalArgumentException("bytes are not a spatial object");
         }
+
         var buffer = ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN);
         var objType = buffer.getInt(0);
-        switch (objType) {
-            case 8 -> {
-                return ParsePoints(buffer);
-            }
-            case 3 -> {
-                return ParseLines(buffer);
-            }
-            case 5 -> {
-                return ParsePoly(buffer);
-            }
-        }
-        throw new IllegalArgumentException("bytes are not a spatial object");
+        return switch (objType) {
+            case 8 -> parsePoints(buffer);
+            case 3 -> parseLines(buffer);
+            case 5 -> parsePoly(buffer);
+            default -> throw new IllegalArgumentException("bytes are not a spatial object");
+        };
     }
 
-    private static String ParsePoints(ByteBuffer value) {
+    private static String parsePoints(ByteBuffer value) {
         var totalPoints = value.getInt(36);
-        if (totalPoints == 1) {
-            return ParseSinglePoint(value);
-        }
-        return ParseMultiPoint(value);
+        return totalPoints == 1
+                ? geoJson("Point", getCoordAt(value, 40))
+                : parseMultiPoint(value);
     }
 
-    private static String ParseSinglePoint(ByteBuffer value) {
-        return GeoJson("Point", GetCoordAt(value, 40));
-    }
-
-    private static String ParseMultiPoint(ByteBuffer value) {
-        var points = new ArrayList<double[]>();
+    private static String parseMultiPoint(ByteBuffer value) {
+        var points = new ArrayList<Point>();
         var i = 40;
         while (i < value.capacity()) {
-            points.add(GetCoordAt(value, i));
+            points.add(getCoordAt(value, i));
             i += BytesPerPoint;
         }
-        return GeoJson("MultiPoint", points);
+        return geoJson("MultiPoint", points);
     }
 
-    private static String ParseLines(ByteBuffer value) {
-        var lines = ParseMultiPointObjects(value);
-
-        if (lines.size() == 1) {
-            return GeoJson("LineString", lines.getFirst());
-        }
-        return GeoJson("MultiLineString", lines);
+    private static String parseLines(ByteBuffer value) {
+        var lines = parseMultiPointObjects(value);
+        return lines.size() == 1
+                ? geoJson("LineString", lines.getFirst())
+                : geoJson("MultiLineString", lines);
     }
 
-    private static String ParsePoly(ByteBuffer value) {
-        var poly = ParseMultiPointObjects(value);
-
+    private static String parsePoly(ByteBuffer value) {
+        var poly = parseMultiPointObjects(value);
         if (poly.size() == 1) {
-            return GeoJson("Polygon", poly);
+            return geoJson("Polygon", poly);
         }
-        var coordinates = new ArrayList<ArrayList<ArrayList<double[]>>>();
+
+        var coordinates = new ArrayList<ArrayList<ArrayList<Point>>>();
         coordinates.add(poly);
-        return GeoJson("MultiPolygon", coordinates);
+        return geoJson("MultiPolygon", coordinates);
     }
 
-    private static ArrayList<ArrayList<double[]>> ParseMultiPointObjects(ByteBuffer value) {
-        var endingIndices = GetEndingIndices(value);
+    private static ArrayList<ArrayList<Point>> parseMultiPointObjects(ByteBuffer value) {
+        var endingIndices = getEndingIndices(value);
 
         var i = 48 + (endingIndices.length * 4) - 4;
-        var objects = new ArrayList<ArrayList<double[]>>();
+        var objects = new ArrayList<ArrayList<Point>>();
         for (var endingIndex : endingIndices) {
-            var line = new ArrayList<double[]>();
+            var line = new ArrayList<Point>();
             while (i < endingIndex) {
-                line.add(GetCoordAt(value, i));
+                line.add(getCoordAt(value, i));
                 i += BytesPerPoint;
             }
             objects.add(line);
@@ -102,7 +92,7 @@ public class Spatial {
         return objects;
     }
 
-    private static int[] GetEndingIndices(ByteBuffer value) {
+    private static int[] getEndingIndices(ByteBuffer value) {
         var totalObjects = value.getInt(36);
         var totalPoints = (int) value.getLong(40);
         var endingIndices = new int[totalObjects];
@@ -119,49 +109,45 @@ public class Spatial {
         return endingIndices;
     }
 
-    private static double[] GetCoordAt(ByteBuffer value, int at) {
+    private static Point getCoordAt(ByteBuffer value, int at) {
         var lng = value.getDouble(at);
         var lat = value.getDouble(at + 8);
-        return new double[]{lng, lat};
+        return new Point(lng, lat);
     }
 
-    private static String GeoJson(String objType, Object coordinates) {
+    private static String geoJson(String objType, Object coordinates) {
         var builder = new StringBuilder();
         builder.append("{\"yxdbType\":\"");
         builder.append(objType);
         builder.append("\",\"coordinates\":");
-        CoordinatesToJson(builder, coordinates);
+        coordinatesToJson(builder, coordinates);
         builder.append('}');
         return builder.toString();
     }
 
-    private static void CoordinatesToJson(StringBuilder builder, Object coordinates) {
-        if (coordinates instanceof List items) {
-            builder.append('[');
-            var first = true;
-            for (var item : items) {
-                if (!first) {
-                    builder.append(',');
+    private static void coordinatesToJson(StringBuilder builder, Object coordinates) {
+        switch (coordinates) {
+            case List<?> list -> {
+                builder.append('[');
+                var first = true;
+                for (var item : list) {
+                    if (!first) {
+                        builder.append(',');
+                    }
+                    coordinatesToJson(builder, item);
+                    first = false;
                 }
-                CoordinatesToJson(builder, item);
-                first = false;
+
+                builder.append(']');
             }
-            builder.append(']');
-            return;
-        }
-        if (coordinates instanceof double[] items) {
-            builder.append('[');
-            var first = true;
-            for (var item : items) {
-                if (!first) {
-                    builder.append(',');
-                }
-                CoordinatesToJson(builder, item);
-                first = false;
+            case Point(double lng, double lat) -> {
+                builder.append('[');
+                builder.append(lng);
+                builder.append(',');
+                builder.append(lat);
+                builder.append(']');
             }
-            builder.append(']');
-            return;
+            default -> builder.append(coordinates);
         }
-        builder.append(coordinates);
     }
 }
