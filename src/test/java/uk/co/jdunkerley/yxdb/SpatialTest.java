@@ -63,13 +63,13 @@ public class SpatialTest {
     }
 
     @Test
-    public void TestInvalidObjectType(){
+    public void TestInvalidObjectType() {
         var data = new byte[]{1, 0, 0, 0, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34};
         Assertions.assertThrows(IllegalArgumentException.class, () -> Spatial.ToGeoJson(data));
     }
 
     @Test
-    public void TestFileTooShort(){
+    public void TestFileTooShort() {
         var data = new byte[]{3, 0, 0, 0};
         Assertions.assertThrows(IllegalArgumentException.class, () -> Spatial.ToGeoJson(data));
     }
@@ -77,7 +77,7 @@ public class SpatialTest {
     private void TestSpatial(String path, String expected) throws IOException {
         expected = expected.replace(" ", "");
         var reader = new YxdbReader(path);
-        while (reader.next()){
+        while (reader.next()) {
             var blob = reader.readBlob(1);
             var geo = Spatial.ToGeoJson(blob);
             System.out.println(geo);

@@ -15,7 +15,7 @@ public class YxdbRecordTest {
     @Test
     public void TestReadInt16Record() {
         var record = loadRecordWithValueColumn("Int16", 2);
-        var source = wrap(new byte[]{23,0,0});
+        var source = wrap(new byte[]{23, 0, 0});
 
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertEquals("Int16", record.fields[0].yxdbType());
@@ -29,8 +29,8 @@ public class YxdbRecordTest {
 
     @Test
     public void TestReadInt32Record() {
-        var record = loadRecordWithValueColumn("Int32",4);
-        var source = wrap(new byte[]{23,0,0,0,0});
+        var record = loadRecordWithValueColumn("Int32", 4);
+        var source = wrap(new byte[]{23, 0, 0, 0, 0});
 
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertEquals("Int32", record.fields[0].yxdbType());
@@ -45,7 +45,7 @@ public class YxdbRecordTest {
     @Test
     public void TestReadInt64Record() {
         var record = loadRecordWithValueColumn("Int64", 8);
-        var source = wrap(new byte[]{23,0,0,0,0,0,0,0,0});
+        var source = wrap(new byte[]{23, 0, 0, 0, 0, 0, 0, 0, 0});
 
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertEquals("Int64", record.fields[0].yxdbType());
@@ -60,7 +60,7 @@ public class YxdbRecordTest {
     @Test
     public void TestReadFloatRecord() {
         var record = loadRecordWithValueColumn("Float", 4);
-        var source = wrap(new byte[]{-51,-52,-116,63,0,0,0,0, 0});
+        var source = wrap(new byte[]{-51, -52, -116, 63, 0, 0, 0, 0, 0});
 
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertEquals("Float", record.fields[0].yxdbType());
@@ -75,7 +75,7 @@ public class YxdbRecordTest {
     @Test
     public void TestReadDoubleRecord() {
         var record = loadRecordWithValueColumn("Double", 8);
-        var source = wrap(new byte[]{-102,-103,-103,-103,-103,-103,-15,63,0});
+        var source = wrap(new byte[]{-102, -103, -103, -103, -103, -103, -15, 63, 0});
 
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertEquals("Double", record.fields[0].yxdbType());
@@ -139,7 +139,7 @@ public class YxdbRecordTest {
     public void TestReadV_String() {
         // Size is ignored for V_WString
         var record = loadRecordWithValueColumn("V_String", 15);
-        var source = wrap(new byte[]{0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        var source = wrap(new byte[]{0, 0, 0, 0, 4, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertEquals("V_String", record.fields[0].yxdbType());
@@ -156,7 +156,7 @@ public class YxdbRecordTest {
     public void TestReadV_WString() {
         // Size is ignored for V_WString
         var record = loadRecordWithValueColumn("V_WString", 15);
-        var source = wrap(new byte[]{0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        var source = wrap(new byte[]{0, 0, 0, 0, 4, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertEquals("V_WString", record.fields[0].yxdbType());
@@ -172,9 +172,9 @@ public class YxdbRecordTest {
     @Test
     public void TestReadDate() throws ParseException {
         var record = loadRecordWithValueColumn("Date", 10);
-        var source = wrap(new byte[]{50,48,50,49,45,48,49,45,48,49,0});
+        var source = wrap(new byte[]{50, 48, 50, 49, 45, 48, 49, 45, 48, 49, 0});
 
-        var expected = LocalDate.of(2021, 1,1);
+        var expected = LocalDate.of(2021, 1, 1);
 
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertSame(DataType.DATE, record.fields[0].dataType());
@@ -188,7 +188,7 @@ public class YxdbRecordTest {
     @Test
     public void TestReadTime() throws ParseException {
         var record = loadRecordWithValueColumn("Time", 8);
-        var source = wrap(new byte[]{48,51,58,48,52,58,48,53,0});
+        var source = wrap(new byte[]{48, 51, 58, 48, 52, 58, 48, 53, 0});
 
         var expected = LocalTime.of(3, 4, 5);
 
@@ -204,7 +204,7 @@ public class YxdbRecordTest {
     @Test
     public void TestReadDateTime() throws ParseException {
         var record = loadRecordWithValueColumn("DateTime", 19);
-        var source = wrap(new byte[]{50,48,50,49,45,48,49,45,48,50,32,48,51,58,48,52,58,48,53,0});
+        var source = wrap(new byte[]{50, 48, 50, 49, 45, 48, 49, 45, 48, 50, 32, 48, 51, 58, 48, 52, 58, 48, 53, 0});
 
         var expected = LocalDateTime.of(2021, 1, 2, 3, 4, 5);
 
@@ -238,7 +238,7 @@ public class YxdbRecordTest {
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertSame(DataType.BYTE, record.fields[0].dataType());
         Assertions.assertEquals("value", record.fields[0].name());
-        Assertions.assertEquals((byte)23, record.extractByteFrom(0, source));
+        Assertions.assertEquals((byte) 23, record.extractByteFrom(0, source));
         Assertions.assertEquals(2, record.fixedSize);
         Assertions.assertFalse(record.hasVar);
     }
@@ -246,7 +246,7 @@ public class YxdbRecordTest {
     @Test
     public void TestReadBlob() {
         var record = loadRecordWithValueColumn("Blob", 100);
-        var source = wrap(new byte[]{0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        var source = wrap(new byte[]{0, 0, 0, 0, 4, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertSame(DataType.BLOB, record.fields[0].dataType());
@@ -259,7 +259,7 @@ public class YxdbRecordTest {
     @Test
     public void TestReadSpatialObj() {
         var record = loadRecordWithValueColumn("SpatialObj", 100);
-        var source = wrap(new byte[]{0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        var source = wrap(new byte[]{0, 0, 0, 0, 4, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
         Assertions.assertEquals(1, record.fields.length);
         Assertions.assertSame(DataType.BLOB, record.fields[0].dataType());
@@ -269,7 +269,7 @@ public class YxdbRecordTest {
 
     private static YxdbRecord loadRecordWithValueColumn(String type, int size) {
         var field = YxdbField.makeField(0, 0, "value", type, "SOURCE", "DESCRIPTION", () -> size, () -> 0);
-        var fields = new YxdbField[] { field };
+        var fields = new YxdbField[]{field};
         return new YxdbRecord(fields);
     }
 

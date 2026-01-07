@@ -18,83 +18,83 @@ public class ExtractorsTest {
     }
 
     @Test
-    public void ExtractInt16(){
+    public void ExtractInt16() {
         ExtractorFunction<Long> extract = Extractors::extractInt16;
-        Long result = extractFromBuffer(extract, 2, new byte[]{0, 0, 10,0,0,0});
+        Long result = extractFromBuffer(extract, 2, new byte[]{0, 0, 10, 0, 0, 0});
 
         Assertions.assertEquals(10, result);
     }
 
     @Test
-    public void ExtractNullInt16(){
+    public void ExtractNullInt16() {
         ExtractorFunction<Long> extract = Extractors::extractInt16;
-        Long result = extractFromBuffer(extract, 2, new byte[]{0, 0, 10,0,1,0});
+        Long result = extractFromBuffer(extract, 2, new byte[]{0, 0, 10, 0, 1, 0});
 
         Assertions.assertNull(result);
     }
 
     @Test
-    public void ExtractInt32(){
+    public void ExtractInt32() {
         ExtractorFunction<Long> extract = Extractors::extractInt32;
-        Long result = extractFromBuffer(extract, 3, new byte[]{0, 0, 0, 10,0,0,0, 0});
+        Long result = extractFromBuffer(extract, 3, new byte[]{0, 0, 0, 10, 0, 0, 0, 0});
 
         Assertions.assertEquals(10, result);
     }
 
     @Test
-    public void ExtractNullInt32(){
+    public void ExtractNullInt32() {
         ExtractorFunction<Long> extract = Extractors::extractInt32;
-        Long result = extractFromBuffer(extract, 3, new byte[]{0, 0, 0, 10,0,0,0, 1});
+        Long result = extractFromBuffer(extract, 3, new byte[]{0, 0, 0, 10, 0, 0, 0, 1});
 
         Assertions.assertNull(result);
     }
 
     @Test
-    public void ExtractInt64(){
+    public void ExtractInt64() {
         ExtractorFunction<Long> extract = Extractors::extractInt64;
-        Long result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,10,0,0,0,0,0,0,0, 0});
+        Long result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0});
 
         Assertions.assertEquals(10, result);
     }
 
     @Test
-    public void ExtractNullInt64(){
+    public void ExtractNullInt64() {
         ExtractorFunction<Long> extract = Extractors::extractInt64;
-        Long result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,10,0,0,0,0,0,0,0, 1});
+        Long result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 1});
 
         Assertions.assertNull(result);
     }
 
     @Test
-    public void ExtractBool(){
+    public void ExtractBool() {
         ExtractorFunction<Boolean> extract = Extractors::extractBoolean;
-        Boolean result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,1,0,0,0,0,0,0,0, 0});
+        Boolean result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0});
         Assertions.assertTrue(result);
 
-        result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,0,0,0,0,0,0,0,0, 0});
+        result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
         Assertions.assertFalse(result);
     }
 
     @Test
-    public void ExtractNullBool(){
+    public void ExtractNullBool() {
         ExtractorFunction<Boolean> extract = Extractors::extractBoolean;
-        Boolean result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,2,0,0,0,0,0,0,0, 1});
+        Boolean result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1});
 
         Assertions.assertNull(result);
     }
 
     @Test
-    public void ExtractByte(){
+    public void ExtractByte() {
         ExtractorFunction<Byte> extract = Extractors::extractByte;
-        Byte result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,10,0,0,0,0,0,0,0, 0});
+        Byte result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0});
 
-        Assertions.assertEquals((byte)10, result);
+        Assertions.assertEquals((byte) 10, result);
     }
 
     @Test
-    public void ExtractNullByte(){
+    public void ExtractNullByte() {
         ExtractorFunction<Byte> extract = Extractors::extractByte;
-        Byte result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,2,1,0,0,0,0,0,0, 1});
+        Byte result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 1});
 
         Assertions.assertNull(result);
     }
@@ -102,7 +102,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractFloat() {
         ExtractorFunction<Double> extract = Extractors::extractFloat;
-        Double result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,-51,-52,-116,63,0,0,0,0, 0});
+        Double result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, -51, -52, -116, 63, 0, 0, 0, 0, 0});
 
         Assertions.assertEquals(1.1f, result);
     }
@@ -110,7 +110,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractNullFloat() {
         ExtractorFunction<Double> extract = Extractors::extractFloat;
-        Double result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,-51,-52,-116,63,1,0,0,0, 0});
+        Double result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, -51, -52, -116, 63, 1, 0, 0, 0, 0});
 
         Assertions.assertNull(result);
     }
@@ -118,7 +118,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractDouble() {
         ExtractorFunction<Double> extract = Extractors::extractDouble;
-        Double result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,-102,-103,-103,-103,-103,-103,-15,63,0});
+        Double result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, -102, -103, -103, -103, -103, -103, -15, 63, 0});
 
         Assertions.assertEquals(1.1, result);
     }
@@ -126,7 +126,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractNullDouble() {
         ExtractorFunction<Double> extract = Extractors::extractDouble;
-        Double result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,-102,-103,-103,-103,-103,-103,-15,63,1});
+        Double result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, -102, -103, -103, -103, -103, -103, -15, 63, 1});
 
         Assertions.assertNull(result);
     }
@@ -134,15 +134,15 @@ public class ExtractorsTest {
     @Test
     public void ExtractDate() throws ParseException {
         ExtractorFunction<LocalDate> extract = Extractors::extractDate;
-        LocalDate result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,50,48,50,49,45,48,49,45,48,49,0});
+        LocalDate result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 50, 48, 50, 49, 45, 48, 49, 45, 48, 49, 0});
 
-        Assertions.assertEquals(LocalDate.of(2021, 1,1), result);
+        Assertions.assertEquals(LocalDate.of(2021, 1, 1), result);
     }
 
     @Test
     public void ExtractNullDate() {
         ExtractorFunction<LocalDate> extract = Extractors::extractDate;
-        LocalDate result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,50,48,50,49,45,48,49,45,48,49,1});
+        LocalDate result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 50, 48, 50, 49, 45, 48, 49, 45, 48, 49, 1});
 
         Assertions.assertNull(result);
     }
@@ -150,7 +150,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractDateTime() throws ParseException {
         ExtractorFunction<LocalDateTime> extract = Extractors::extractDateTime;
-        LocalDateTime result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,50,48,50,49,45,48,49,45,48,50,32,48,51,58,48,52,58,48,53,0});
+        LocalDateTime result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 50, 48, 50, 49, 45, 48, 49, 45, 48, 50, 32, 48, 51, 58, 48, 52, 58, 48, 53, 0});
 
         Assertions.assertEquals(LocalDateTime.of(2021, 1, 2, 3, 4, 5), result);
     }
@@ -158,7 +158,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractNullDateTime() {
         ExtractorFunction<LocalDateTime> extract = Extractors::extractDateTime;
-        LocalDateTime result = extractFromBuffer(extract, 4, new byte[]{0,0,0,0,50,48,50,49,45,48,49,45,48,50,32,48,51,58,48,52,58,48,53,1});
+        LocalDateTime result = extractFromBuffer(extract, 4, new byte[]{0, 0, 0, 0, 50, 48, 50, 49, 45, 48, 49, 45, 48, 50, 32, 48, 51, 58, 48, 52, 58, 48, 53, 1});
 
         Assertions.assertNull(result);
     }
@@ -265,7 +265,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractEmptyBlob() {
         ExtractorFunction<byte[]> extract = Extractors::extractBlob;
-        byte[] result = extractFromBuffer(extract, 2, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        byte[] result = extractFromBuffer(extract, 2, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
         Assertions.assertArrayEquals(new byte[]{}, result);
     }
@@ -273,7 +273,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractNullBlob() {
         ExtractorFunction<byte[]> extract = Extractors::extractBlob;
-        byte[] result = extractFromBuffer(extract, 2, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        byte[] result = extractFromBuffer(extract, 2, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
         Assertions.assertNull(result);
     }
@@ -289,7 +289,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractNullV_String() {
         ExtractorFunction<String> extract = Extractors::extractVString;
-        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
         Assertions.assertNull(result);
     }
@@ -297,7 +297,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractEmptyV_String() {
         ExtractorFunction<String> extract = Extractors::extractVString;
-        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
         Assertions.assertEquals("", result);
     }
@@ -313,7 +313,7 @@ public class ExtractorsTest {
     @Test
     public void ExtractNullV_WString() {
         ExtractorFunction<String> extract = Extractors::extractVWString;
-        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
         Assertions.assertNull(result);
     }
@@ -321,16 +321,16 @@ public class ExtractorsTest {
     @Test
     public void ExtractEmptyV_WString() {
         ExtractorFunction<String> extract = Extractors::extractVWString;
-        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1,2,3,4,5,6,7,8});
+        String result = extractFromBuffer(extract, 2, new byte[]{0, 0, 0, 0, 0, 0, 4, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8});
 
         Assertions.assertEquals("", result);
     }
 
-    private static <T> T extractFromBuffer(ExtractorFunction<T> extract, int startAt, byte[] data){
+    private static <T> T extractFromBuffer(ExtractorFunction<T> extract, int startAt, byte[] data) {
         var buffer = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
         return extract.apply(buffer, startAt);
     }
 
-    public static byte[] smallBlob = new byte[]{1, 0, 12, 0, 0, 0, 109, 0, 0, 0, (byte)202, 0, 0, 0, (byte)201, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, (byte)201, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66};
-    public static byte[] normalBlob = new byte[]{1, 0, 12, 0, 0, 0, (byte)212, 0, 0, 0, (byte)152, 1, 0, 0, (byte)144, 1, 0, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, (byte)144, 1, 0, 0, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66};
+    public static byte[] smallBlob = new byte[]{1, 0, 12, 0, 0, 0, 109, 0, 0, 0, (byte) 202, 0, 0, 0, (byte) 201, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, (byte) 201, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66};
+    public static byte[] normalBlob = new byte[]{1, 0, 12, 0, 0, 0, (byte) 212, 0, 0, 0, (byte) 152, 1, 0, 0, (byte) 144, 1, 0, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, 65, 0, (byte) 144, 1, 0, 0, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66, 66};
 }

@@ -1,7 +1,7 @@
 package uk.co.jdunkerley.yxdb;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -21,8 +21,8 @@ public class YxdbReaderTest {
 
         int read = 0;
         while (yxdb.next()) {
-            Assertions.assertEquals((byte)1, yxdb.readByte(0));
-            Assertions.assertEquals((byte)1, yxdb.readByte("ByteField"));
+            Assertions.assertEquals((byte) 1, yxdb.readByte(0));
+            Assertions.assertEquals((byte) 1, yxdb.readByte("ByteField"));
             Assertions.assertTrue(yxdb.readBoolean(1));
             Assertions.assertTrue(yxdb.readBoolean("BoolField"));
             Assertions.assertEquals(16, yxdb.readLong(2));
@@ -92,13 +92,13 @@ public class YxdbReaderTest {
     public void RetrievingFieldWithWrongTypeThrows() throws IOException {
         var yxdb = new YxdbReader("src/test/resources/AllNormalFields.yxdb");
         yxdb.next();
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readString(0));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readBoolean(0));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readBlob(0));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readDate(0));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readDouble(0));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readLong(0));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readByte(1));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readString(0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readBoolean(0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readBlob(0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readDate(0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readDouble(0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readLong(0));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readByte(1));
         try {
             yxdb.readString(0);
         } catch (Exception ex) {
@@ -110,13 +110,13 @@ public class YxdbReaderTest {
     public void RetrievingFieldWithInvalidNameThrows() throws IOException {
         var yxdb = new YxdbReader("src/test/resources/AllNormalFields.yxdb");
         yxdb.next();
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readByte("Invalid"));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readString("Invalid"));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readBoolean("Invalid"));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readBlob("Invalid"));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readDate("Invalid"));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readDouble("Invalid"));
-        Assertions.assertThrows(IllegalArgumentException.class, ()->yxdb.readLong("Invalid"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readByte("Invalid"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readString("Invalid"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readBoolean("Invalid"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readBlob("Invalid"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readDate("Invalid"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readDouble("Invalid"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> yxdb.readLong("Invalid"));
         try {
             yxdb.readString("Invalid");
         } catch (Exception ex) {
@@ -140,7 +140,7 @@ public class YxdbReaderTest {
     public void TestNewYxdb() throws IOException {
         var yxdb = new YxdbReader("src/test/resources/TestNewYxdb.yxdb");
         byte sum = 0;
-        while (yxdb.next()){
+        while (yxdb.next()) {
             sum += yxdb.readByte(1);
         }
         Assertions.assertEquals(6, sum);
@@ -200,23 +200,23 @@ public class YxdbReaderTest {
     }
 
     String AllNormalFieldsMetaXml = """
-<RecordInfo>
-	<Field name="ByteField" source="TextInput:" type="Byte"/>
-	<Field name="BoolField" source="Formula: 1" type="Bool"/>
-	<Field name="Int16Field" source="Formula: 16" type="Int16"/>
-	<Field name="Int32Field" source="Formula: 32" type="Int32"/>
-	<Field name="Int64Field" source="Formula: 64" type="Int64"/>
-	<Field name="FixedDecimalField" scale="6" size="19" source="Formula: 123.45" type="FixedDecimal"/>
-	<Field name="FloatField" source="Formula: 678.9" type="Float"/>
-	<Field name="DoubleField" source="Formula: 0.12345" type="Double"/>
-	<Field name="StringField" size="64" source="Formula: &quot;A&quot;" type="String"/>
-	<Field name="WStringField" size="64" source="Formula: &quot;AB&quot;" type="WString"/>
-	<Field name="V_StringShortField" size="1000" source="Formula: &quot;ABC&quot;" type="V_String"/>
-	<Field name="V_StringLongField" size="2147483647" source="Formula: PadLeft(&quot;&quot;, 500, &apos;B&apos;)" type="V_String"/>
-	<Field name="V_WStringShortField" size="10" source="Formula: &quot;XZY&quot;" type="V_WString"/>
-	<Field name="V_WStringLongField" size="1073741823" source="Formula: PadLeft(&quot;&quot;, 500, &apos;W&apos;)" type="V_WString"/>
-	<Field name="DateField" source="Formula: &apos;2020-01-01&apos;" type="Date"/>
-	<Field name="DateTimeField" source="Formula: &apos;2020-02-03 04:05:06&apos;" type="DateTime"/>
-</RecordInfo>
-""";
+            <RecordInfo>
+            	<Field name="ByteField" source="TextInput:" type="Byte"/>
+            	<Field name="BoolField" source="Formula: 1" type="Bool"/>
+            	<Field name="Int16Field" source="Formula: 16" type="Int16"/>
+            	<Field name="Int32Field" source="Formula: 32" type="Int32"/>
+            	<Field name="Int64Field" source="Formula: 64" type="Int64"/>
+            	<Field name="FixedDecimalField" scale="6" size="19" source="Formula: 123.45" type="FixedDecimal"/>
+            	<Field name="FloatField" source="Formula: 678.9" type="Float"/>
+            	<Field name="DoubleField" source="Formula: 0.12345" type="Double"/>
+            	<Field name="StringField" size="64" source="Formula: &quot;A&quot;" type="String"/>
+            	<Field name="WStringField" size="64" source="Formula: &quot;AB&quot;" type="WString"/>
+            	<Field name="V_StringShortField" size="1000" source="Formula: &quot;ABC&quot;" type="V_String"/>
+            	<Field name="V_StringLongField" size="2147483647" source="Formula: PadLeft(&quot;&quot;, 500, &apos;B&apos;)" type="V_String"/>
+            	<Field name="V_WStringShortField" size="10" source="Formula: &quot;XZY&quot;" type="V_WString"/>
+            	<Field name="V_WStringLongField" size="1073741823" source="Formula: PadLeft(&quot;&quot;, 500, &apos;W&apos;)" type="V_WString"/>
+            	<Field name="DateField" source="Formula: &apos;2020-01-01&apos;" type="Date"/>
+            	<Field name="DateTimeField" source="Formula: &apos;2020-02-03 04:05:06&apos;" type="DateTime"/>
+            </RecordInfo>
+            """;
 }
