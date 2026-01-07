@@ -5,7 +5,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -47,7 +50,7 @@ public class YxdbReader implements AutoCloseable {
             var recordInfoNodes = getRecordInfoNodes(header, stream);
             fields = getFields(recordInfoNodes);
 
-            record = YxdbRecord.newFromFieldList(fields);
+            record = new YxdbRecord(fields);
             recordReader = new BufferedRecordReader(stream, record.fixedSize, record.hasVar, numRecords);
         }
         catch (IOException | IllegalArgumentException ex) {
@@ -143,16 +146,6 @@ public class YxdbReader implements AutoCloseable {
         return recordReader.nextRecord();
     }
 
-    public Object readPolyglotObject(int index) throws IllegalArgumentException {
-        var rawObject = readObject(index);
-        return switch (rawObject) {
-            case null -> null;
-            case BigDecimal bd -> bd.toString();
-            case LocalDateTime ldt -> ldt.toString();
-            default -> rawObject;
-        };
-    }
-
     /**
      * Reads a field from the .yxdb file
      * @param  index the index of the field to read, starting at 0
@@ -160,7 +153,19 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the index is out of range
      */
     public Object readObject(int index) throws IllegalArgumentException {
-        return record.extractObjectFrom(index, recordReader.recordBuffer);
+        var yxdbField = fields[index];
+        return switch (yxdbField.dataType()) {
+            case BOOLEAN -> readBoolean(index);
+            case BYTE -> readByte(index);
+            case LONG -> readLong(index);
+            case DOUBLE -> readDouble(index);
+            case DECIMAL -> readDecimal(index);
+            case STRING -> readString(index);
+            case DATE -> readDate(index);
+            case TIME -> readTime(index);
+            case DATETIME -> readDateTime(index);
+            case BLOB -> (yxdbField.yxdbType().equals(YxdbType.SPATIAL_OBJ) ? Spatial.ToGeoJson(readBlob(index)) : readBlob(index));
+        };
     }
 
     /**
@@ -170,9 +175,8 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist
      */
     public Object readObject(String name) throws IllegalArgumentException {
-        return record.extractObjectFrom(name, recordReader.recordBuffer);
+        return readObject(record.mapName(name));
     }
-
 
     /**
      * Reads a byte field from the .yxdb file
@@ -191,7 +195,7 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist or is not a byte field
      */
     public Byte readByte(String name) throws IllegalArgumentException {
-        return record.extractByteFrom(name, recordReader.recordBuffer);
+        return readByte(record.mapName(name));
     }
 
     /**
@@ -211,7 +215,7 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist or is not a boolean field
      */
     public Boolean readBoolean(String name) throws IllegalArgumentException {
-        return record.extractBooleanFrom(name, recordReader.recordBuffer);
+        return readBoolean(record.mapName(name));
     }
 
     /**
@@ -231,7 +235,7 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist or is not a long integer field
      */
     public Long readLong(String name) throws IllegalArgumentException {
-        return record.extractLongFrom(name, recordReader.recordBuffer);
+        return readLong(record.mapName(name));
     }
 
     /**
@@ -251,7 +255,7 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist or is not a numeric field
      */
     public Double readDouble(String name) throws IllegalArgumentException {
-        return record.extractDoubleFrom(name, recordReader.recordBuffer);
+        return readDouble(record.mapName(name));
     }
 
     /**
@@ -271,7 +275,7 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist or is not a numeric field
      */
     public BigDecimal readDecimal(String name) throws IllegalArgumentException {
-        return record.extractDecimalFrom(name, recordReader.recordBuffer);
+        return readDecimal(record.mapName(name));
     }
 
     /**
@@ -291,7 +295,7 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist or is not a text field
      */
     public String readString(String name) throws IllegalArgumentException {
-        return record.extractStringFrom(name, recordReader.recordBuffer);
+        return readString(record.mapName(name));
     }
 
     /**
@@ -311,7 +315,7 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist or is not a date field
      */
     public LocalDate readDate(String name) throws IllegalArgumentException {
-        return record.extractDateFrom(name, recordReader.recordBuffer);
+        return readDate(record.mapName(name));
     }
 
     /**
@@ -331,7 +335,7 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist or is not a date field
      */
     public LocalTime readTime(String name) throws IllegalArgumentException {
-        return record.extractTimeFrom(name, recordReader.recordBuffer);
+        return readTime(record.mapName(name));
     }
 
     /**
@@ -351,7 +355,7 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist or is not a date field
      */
     public LocalDateTime readDateTime(String name) throws IllegalArgumentException {
-        return record.extractDateTimeFrom(name, recordReader.recordBuffer);
+        return readDateTime(record.mapName(name));
     }
 
     /**
@@ -371,7 +375,7 @@ public class YxdbReader implements AutoCloseable {
      * @throws IllegalArgumentException thrown when the field does not exist or is not a blob field
      */
     public byte[] readBlob(String name) throws IllegalArgumentException {
-        return record.extractBlobFrom(name, recordReader.recordBuffer);
+        return readBlob(record.mapName(name));
     }
 
     private static ByteBuffer getHeader(BufferedInputStream stream) throws IOException, IllegalArgumentException {

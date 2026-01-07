@@ -5,13 +5,41 @@ import org.junit.jupiter.api.Test;
 
 public class YxdbTypeTest {
     @Test
+    public void TestCommonFactory() {
+        var yxdbType = "Bool";
+        var field = YxdbField.makeField(
+                7,
+                123,
+                yxdbType + "Field",
+                yxdbType,
+                "SOURCE",
+                "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(7, field.index());
+        Assertions.assertEquals(123, field.startPosition());
+        Assertions.assertEquals(yxdbType + "Field", field.name());
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals("SOURCE", field.source());
+        Assertions.assertEquals("DESCRIPTION", field.description());
+    }
+
+    @Test
     public void TestBooleanType() {
         var yxdbType = "Bool";
         Assertions.assertEquals(YxdbType.BOOLEAN, yxdbType);
         Assertions.assertEquals(DataType.BOOLEAN, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 13, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.BOOLEAN, field.dataType());
+        Assertions.assertEquals(1, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(1, YxdbType.sizeOf(field));
+        Assertions.assertEquals(14, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -21,8 +49,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.BYTE, yxdbType);
         Assertions.assertEquals(DataType.BYTE, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 9, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.BYTE, field.dataType());
+        Assertions.assertEquals(1, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(2, YxdbType.sizeOf(field));
+        Assertions.assertEquals(11, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -32,8 +68,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.INT16, yxdbType);
         Assertions.assertEquals(DataType.LONG, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 14, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.LONG, field.dataType());
+        Assertions.assertEquals(2, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(3, YxdbType.sizeOf(field));
+        Assertions.assertEquals(17, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -43,8 +87,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.INT32, yxdbType);
         Assertions.assertEquals(DataType.LONG, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 18, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.LONG, field.dataType());
+        Assertions.assertEquals(4, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(5, YxdbType.sizeOf(field));
+        Assertions.assertEquals(23, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -54,8 +106,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.INT64, yxdbType);
         Assertions.assertEquals(DataType.LONG, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 23, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.LONG, field.dataType());
+        Assertions.assertEquals(8, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(9, YxdbType.sizeOf(field));
+        Assertions.assertEquals(32, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -65,8 +125,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.FLOAT, yxdbType);
         Assertions.assertEquals(DataType.DOUBLE, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 27, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.DOUBLE, field.dataType());
+        Assertions.assertEquals(4, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(5, YxdbType.sizeOf(field));
+        Assertions.assertEquals(32, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -76,8 +144,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.DOUBLE, yxdbType);
         Assertions.assertEquals(DataType.DOUBLE, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 29, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.DOUBLE, field.dataType());
+        Assertions.assertEquals(8, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(9, YxdbType.sizeOf(field));
+        Assertions.assertEquals(38, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -87,8 +163,13 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.DECIMAL, yxdbType);
         Assertions.assertEquals(DataType.DECIMAL, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 13, 2, null, null);
+        var field = YxdbField.makeField( -1, 29, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION", () -> 13, () -> 2);
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.DECIMAL, field.dataType());
+        Assertions.assertEquals(13, field.size());
+        Assertions.assertEquals(2, field.scale());
         Assertions.assertEquals(14, YxdbType.sizeOf(field));
+        Assertions.assertEquals(43, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -98,8 +179,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.DATE, yxdbType);
         Assertions.assertEquals(DataType.DATE, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 34, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.DATE, field.dataType());
+        Assertions.assertEquals(10, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(11, YxdbType.sizeOf(field));
+        Assertions.assertEquals(45, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -109,8 +198,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.TIME, yxdbType);
         Assertions.assertEquals(DataType.TIME, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 34, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.TIME, field.dataType());
+        Assertions.assertEquals(8, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(9, YxdbType.sizeOf(field));
+        Assertions.assertEquals(43, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -120,8 +217,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.DATETIME, yxdbType);
         Assertions.assertEquals(DataType.DATETIME, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 34, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.DATETIME, field.dataType());
+        Assertions.assertEquals(19, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(20, YxdbType.sizeOf(field));
+        Assertions.assertEquals(54, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -131,8 +236,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.STRING, yxdbType);
         Assertions.assertEquals(DataType.STRING, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 15, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 34, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> 15,
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.STRING, field.dataType());
+        Assertions.assertEquals(15, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(16, YxdbType.sizeOf(field));
+        Assertions.assertEquals(50, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -142,8 +255,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.V_STRING, yxdbType);
         Assertions.assertEquals(DataType.STRING, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 34, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.STRING, field.dataType());
+        Assertions.assertEquals(4, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(4, YxdbType.sizeOf(field));
+        Assertions.assertEquals(38, field.endPosition());
         Assertions.assertTrue(field.isVariableLength());
     }
 
@@ -153,8 +274,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.WSTRING, yxdbType);
         Assertions.assertEquals(DataType.STRING, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 15, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 34, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> 15,
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.STRING, field.dataType());
+        Assertions.assertEquals(15, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(31, YxdbType.sizeOf(field));
+        Assertions.assertEquals(65, field.endPosition());
         Assertions.assertFalse(field.isVariableLength());
     }
 
@@ -164,7 +293,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.V_WSTRING, yxdbType);
         Assertions.assertEquals(DataType.STRING, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 34, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.STRING, field.dataType());
+        Assertions.assertEquals(4, field.size());
+        Assertions.assertEquals(0, field.scale());
+        Assertions.assertEquals(4, YxdbType.sizeOf(field));
+        Assertions.assertEquals(38, field.endPosition());
         Assertions.assertEquals(4, YxdbType.sizeOf(field));
         Assertions.assertTrue(field.isVariableLength());
     }
@@ -175,8 +313,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.BLOB, yxdbType);
         Assertions.assertEquals(DataType.BLOB, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 34, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.BLOB, field.dataType());
+        Assertions.assertEquals(4, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(4, YxdbType.sizeOf(field));
+        Assertions.assertEquals(38, field.endPosition());
         Assertions.assertTrue(field.isVariableLength());
     }
 
@@ -186,8 +332,16 @@ public class YxdbTypeTest {
         Assertions.assertEquals(YxdbType.SPATIAL_OBJ, yxdbType);
         Assertions.assertEquals(DataType.BLOB, YxdbType.dataTypeOf(yxdbType));
 
-        var field = new YxdbField(-1, -1, null, yxdbType, 0, 0, null, null);
+        var field = YxdbField.makeField(
+                -1, 34, yxdbType + "Field", yxdbType, "SOURCE", "DESCRIPTION",
+                () -> { throw new IllegalArgumentException("Size called."); },
+                () -> { throw new IllegalArgumentException("Scale called."); });
+        Assertions.assertEquals(yxdbType, field.yxdbType());
+        Assertions.assertEquals(DataType.BLOB, field.dataType());
+        Assertions.assertEquals(4, field.size());
+        Assertions.assertEquals(0, field.scale());
         Assertions.assertEquals(4, YxdbType.sizeOf(field));
+        Assertions.assertEquals(38, field.endPosition());
         Assertions.assertTrue(field.isVariableLength());
     }
 }

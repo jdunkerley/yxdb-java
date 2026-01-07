@@ -5,95 +5,55 @@ import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-class YxdbRecord {
-    private YxdbRecord(int fieldCount){
-        nameToIndex = new HashMap<>(fieldCount);
-        fields = new ArrayList<>(fieldCount);
-    }
-
-    public final List<YxdbField> fields;
+final class YxdbRecord {
+    final YxdbField[] fields;
     private final Map<String, Integer> nameToIndex;
 
-    public int fixedSize;
-    public boolean hasVar;
+    int fixedSize;
+    boolean hasVar;
 
-    private void addFieldNameToIndexMap(YxdbField field) {
-        assert field.index() == fields.size();
-        fields.add(field);
-        nameToIndex.put(field.name(), field.index());
-    }
+    YxdbRecord(YxdbField[] fields) {
+        this.fields = fields;
 
-    static YxdbRecord newFromFieldList(YxdbField[] fields) throws IllegalArgumentException {
-        YxdbRecord record = new YxdbRecord(fields.length);
-        int lastRecord = 0;
+        hasVar = false;
+        nameToIndex = new HashMap<>(fields.length);
         for (YxdbField field: fields) {
-            record.addFieldNameToIndexMap(field);
-            record.hasVar = record.hasVar || field.isVariableLength();
-            lastRecord = field.endPosition();
+            nameToIndex.put(field.name(), field.index());
+            hasVar = hasVar || field.isVariableLength();
         }
-        record.fixedSize = lastRecord;
-        return record;
+
+        fixedSize = fields.length == 0 ? 0 : fields[fields.length - 1].endPosition();
     }
 
-    private int mapName(String name) {
+    int mapName(String name) {
         var index = nameToIndex.get(name);
         if (index == null) {
-            throwInvalidName(name);
+            throw new IllegalArgumentException("The field " + name + " does not exist.");
         }
         return index;
     }
 
-    public Object extractObjectFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
-        return switch (yxdbField.dataType()) {
-            case BOOLEAN -> extractBooleanFrom(index, buffer);
-            case BYTE -> extractByteFrom(index, buffer);
-            case LONG -> extractLongFrom(index, buffer);
-            case DOUBLE -> extractDoubleFrom(index, buffer);
-            case DECIMAL -> extractDecimalFrom(index, buffer);
-            case STRING -> extractStringFrom(index, buffer);
-            case DATE -> extractDateFrom(index, buffer);
-            case TIME -> extractTimeFrom(index, buffer);
-            case DATETIME -> extractDateTimeFrom(index, buffer);
-            case BLOB -> (yxdbField.yxdbType().equals(YxdbType.SPATIAL_OBJ) ? Spatial.ToGeoJson(extractBlobFrom(index, buffer)) : extractBlobFrom(index, buffer));
-        };
-    }
-
-    public Object extractObjectFrom(String name, ByteBuffer buffer) {
-        return extractObjectFrom(mapName(name), buffer);
-    }
-
-    public Boolean extractBooleanFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
+    Boolean extractBooleanFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.BOOLEAN) {
             throwInvalidIndex(index, "boolean");
         }
         return Extractors.extractBoolean(buffer, yxdbField.startPosition());
     }
 
-    public Boolean extractBooleanFrom(String name, ByteBuffer buffer) {
-        return extractBooleanFrom(mapName(name), buffer);
-    }
-
-    public Byte extractByteFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
+    Byte extractByteFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.BYTE) {
             throwInvalidIndex(index, "byte");
         }
         return Extractors.extractByte(buffer, yxdbField.startPosition());
     }
 
-    public Byte extractByteFrom(String name, ByteBuffer buffer) {
-        return extractByteFrom(mapName(name), buffer);
-    }
-
-    public Long extractLongFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
+    Long extractLongFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.LONG) {
             throwInvalidIndex(index, "int16 / int32 / int64");
         }
@@ -105,12 +65,8 @@ class YxdbRecord {
         };
     }
 
-    public Long extractLongFrom(String name, ByteBuffer buffer) {
-        return extractLongFrom(mapName(name), buffer);
-    }
-
-    public Double extractDoubleFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
+    Double extractDoubleFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.DOUBLE) {
             throwInvalidIndex(index, "float / double");
         }
@@ -121,24 +77,16 @@ class YxdbRecord {
         };
     }
 
-    public Double extractDoubleFrom(String name, ByteBuffer buffer) {
-        return extractDoubleFrom(mapName(name), buffer);
-    }
-
-    public BigDecimal extractDecimalFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
+    BigDecimal extractDecimalFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.DECIMAL) {
             throwInvalidIndex(index, "fixeddecimal");
         }
         return Extractors.extractFixedDecimal(buffer, yxdbField.startPosition(), yxdbField.size());
     }
 
-    public BigDecimal extractDecimalFrom(String name, ByteBuffer buffer) {
-        return extractDecimalFrom(mapName(name), buffer);
-    }
-
-    public String extractStringFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
+    String extractStringFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.STRING) {
             throwInvalidIndex(index, "string / wstring / v_string / v_wstring");
         }
@@ -151,63 +99,39 @@ class YxdbRecord {
         };
     }
 
-    public String extractStringFrom(String name, ByteBuffer buffer) {
-        return extractStringFrom(mapName(name), buffer);
-    }
-
-    public LocalDate extractDateFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
+    LocalDate extractDateFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.DATE) {
             throwInvalidIndex(index, "date");
         }
         return Extractors.extractDate(buffer, yxdbField.startPosition());
     }
 
-    public LocalDate extractDateFrom(String name, ByteBuffer buffer) {
-        return extractDateFrom(mapName(name), buffer);
-    }
-
-    public LocalTime extractTimeFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
+    LocalTime extractTimeFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.TIME) {
             throwInvalidIndex(index, "time");
         }
         return Extractors.extractTime(buffer, yxdbField.startPosition());
     }
 
-    public LocalTime extractTimeFrom(String name, ByteBuffer buffer) {
-        return extractTimeFrom(mapName(name), buffer);
-    }
-
-    public LocalDateTime extractDateTimeFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
+    LocalDateTime extractDateTimeFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.DATETIME) {
             throwInvalidIndex(index, "datetime");
         }
         return Extractors.extractDateTime(buffer, yxdbField.startPosition());
     }
 
-    public LocalDateTime extractDateTimeFrom(String name, ByteBuffer buffer) {
-        return extractDateTimeFrom(mapName(name), buffer);
-    }
-
-    public byte[] extractBlobFrom(int index, ByteBuffer buffer) {
-        var yxdbField = fields.get(index);
+    byte[] extractBlobFrom(int index, ByteBuffer buffer) {
+        var yxdbField = fields[index];
         if (yxdbField.dataType() != DataType.BLOB) {
             throwInvalidIndex(index, "blob / spatial");
         }
         return Extractors.extractBlob(buffer, yxdbField.startPosition());
     }
 
-    public byte[] extractBlobFrom(String name, ByteBuffer buffer) {
-        return extractBlobFrom(mapName(name), buffer);
-    }
-
     private static void throwInvalidIndex(int index, String expectedType) throws IllegalArgumentException {
         throw new IllegalArgumentException("index " + index + " is not a valid index or is not a " + expectedType + " field");
-    }
-
-    private static void throwInvalidName(String name) throws IllegalArgumentException {
-        throw new IllegalArgumentException("field " + name + " does not exist");
     }
 }

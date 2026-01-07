@@ -16,7 +16,7 @@ public record YxdbField(int index, int startPosition, String name, String yxdbTy
             case YxdbType.DECIMAL -> new YxdbField(index, startPosition, name, YxdbType.DECIMAL, sizeProvider.getAsInt(), scaleProvider.getAsInt(), source, description);
             case YxdbType.DATE -> new YxdbField(index, startPosition, name, YxdbType.DATE, 10, 0, source, description);
             case YxdbType.TIME -> new YxdbField(index, startPosition, name, YxdbType.TIME, 8, 0, source, description);
-            case YxdbType.DATETIME -> new YxdbField(index, startPosition, name, YxdbType.DATETIME, 16, 0, source, description);
+            case YxdbType.DATETIME -> new YxdbField(index, startPosition, name, YxdbType.DATETIME, 19, 0, source, description);
             case YxdbType.STRING -> new YxdbField(index, startPosition, name, YxdbType.STRING, sizeProvider.getAsInt(), 0, source, description);
             case YxdbType.V_STRING -> new YxdbField(index, startPosition, name, YxdbType.V_STRING, 4, 0, source, description);
             case YxdbType.WSTRING -> new YxdbField(index, startPosition, name, YxdbType.WSTRING, sizeProvider.getAsInt(), 0, source, description);
