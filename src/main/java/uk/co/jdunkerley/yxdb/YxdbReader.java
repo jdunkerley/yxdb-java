@@ -29,7 +29,6 @@ import static java.lang.Integer.parseInt;
  * takes an InputStream that reads yxdb-formatted bytes.
  */
 public class YxdbReader implements AutoCloseable {
-    private final String path;
     private final BufferedInputStream stream;
 
     private final YxdbField[] fields;
@@ -39,8 +38,37 @@ public class YxdbReader implements AutoCloseable {
 
     private final long numRecords;
 
-    private YxdbReader(String path, BufferedInputStream stream) throws IOException, IllegalArgumentException {
-        this.path = path;
+    /**
+     * Returns a reader that will parse the .yxdb file specified by the path argument.
+     * <p>
+     * Iterate through the records in the .yxdb file by calling next().
+     * <p>
+     * After each call to next(), access the data fields using the readX methods.
+     * <p>
+     * The reader's stream can be closed early by calling the close() method. If the file is read to the end (i.e. next() returns false), the stream is automatically closed.
+     *
+     * @param path the path to a .yxdb file
+     * @throws IllegalArgumentException thrown when the provided file path does not exist or is not a valid YXDB file
+     * @throws IOException              thrown when there are issues reading the file
+     */
+    public YxdbReader(String path) throws IOException, IllegalArgumentException {
+        this(new BufferedInputStream(new FileInputStream(path)));
+    }
+
+    /**
+     * Returns a reader that will parse the .yxdb file contained in the stream.
+     * <p>
+     * Iterate through the records in the .yxdb file by calling next().
+     * <p>
+     * After each call to next(), access the data fields using the readX methods.
+     * <p>
+     * The reader's stream can be closed early by calling the close() method. If the file is read to the end (i.e. next() returns false), the stream is automatically closed.
+     *
+     * @param stream an InputStream for a .yxdb-formatted stream of bytes
+     * @throws IllegalArgumentException thrown when the stream does not contain a valid YXDB file
+     * @throws IOException              thrown when there are issues reading the stream
+     */
+    public YxdbReader(BufferedInputStream stream) throws IOException, IllegalArgumentException {
         this.stream = stream;
 
         try {
@@ -60,47 +88,6 @@ public class YxdbReader implements AutoCloseable {
 
             throw ex;
         }
-    }
-
-    /**
-     * Returns a reader that will parse the .yxdb file specified by the path argument.
-     * <p>
-     * Iterate through the records in the .yxdb file by calling next().
-     * <p>
-     * After each call to next(), access the data fields using the readX methods.
-     * <p>
-     * The reader's stream can be closed early by calling the close() method. If the file is read to the end (i.e. next() returns false), the stream is automatically closed.
-     *
-     * @param path the path to a .yxdb file
-     * @throws IllegalArgumentException thrown when the provided file path does not exist or is not a valid YXDB file
-     * @throws IOException              thrown when there are issues reading the file
-     */
-    public YxdbReader(String path) throws IOException, IllegalArgumentException {
-        this(path, new BufferedInputStream(new FileInputStream(path)));
-    }
-
-    /**
-     * Returns a reader that will parse the .yxdb file contained in the stream.
-     * <p>
-     * Iterate through the records in the .yxdb file by calling next().
-     * <p>
-     * After each call to next(), access the data fields using the readX methods.
-     * <p>
-     * The reader's stream can be closed early by calling the close() method. If the file is read to the end (i.e. next() returns false), the stream is automatically closed.
-     *
-     * @param stream an InputStream for a .yxdb-formatted stream of bytes
-     * @throws IllegalArgumentException thrown when the stream does not contain a valid YXDB file
-     * @throws IOException              thrown when there are issues reading the stream
-     */
-    public YxdbReader(BufferedInputStream stream) throws IOException, IllegalArgumentException {
-        this("", stream);
-    }
-
-    /**
-     * @return the file path of the .yxdb file being read. If the reader was created from a stream, this will be an empty string.
-     */
-    public String path() {
-        return path;
     }
 
     /**
@@ -151,7 +138,7 @@ public class YxdbReader implements AutoCloseable {
      * @return the value of the byte field at the specified index. May be null
      * @throws IllegalArgumentException thrown when the index is out of range
      */
-    public Object readObject(int index) throws IllegalArgumentException {
+    public Object read(int index) throws IllegalArgumentException {
         var yxdbField = fields[index];
         return switch (yxdbField.dataType()) {
             case BOOLEAN -> readBoolean(index);
@@ -175,8 +162,8 @@ public class YxdbReader implements AutoCloseable {
      * @return the value of the specified byte field. May be null.
      * @throws IllegalArgumentException thrown when the field does not exist
      */
-    public Object readObject(String name) throws IllegalArgumentException {
-        return readObject(record.mapName(name));
+    public Object read(String name) throws IllegalArgumentException {
+        return read(record.mapName(name));
     }
 
     /**

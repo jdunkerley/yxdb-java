@@ -54,28 +54,20 @@ final class YxdbRecord {
 
     Long extractLongFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
-        if (yxdbField.dataType() != DataType.LONG) {
-            throw newInvalidIndex(index, "int16 / int32 / int64");
-        }
         return switch (yxdbField.yxdbType()) {
             case YxdbType.INT16 -> Extractors.extractInt16(buffer, yxdbField.startPosition());
             case YxdbType.INT32 -> Extractors.extractInt32(buffer, yxdbField.startPosition());
             case YxdbType.INT64 -> Extractors.extractInt64(buffer, yxdbField.startPosition());
-            default ->
-                    throw new IllegalArgumentException("Field at index " + index + " has invalid byteSize for long integer extraction");
+            default -> throw newInvalidIndex(index, "int16 / int32 / int64");
         };
     }
 
     Double extractDoubleFrom(int index, ByteBuffer buffer) {
         var yxdbField = fields[index];
-        if (yxdbField.dataType() != DataType.DOUBLE) {
-            throw newInvalidIndex(index, "float / double");
-        }
         return switch (yxdbField.yxdbType()) {
             case YxdbType.FLOAT -> Extractors.extractFloat(buffer, yxdbField.startPosition());
             case YxdbType.DOUBLE -> Extractors.extractDouble(buffer, yxdbField.startPosition());
-            default ->
-                    throw new IllegalArgumentException("Field at index " + index + " has invalid byteSize for double extraction");
+            default -> throw newInvalidIndex(index, "float / double");
         };
     }
 
