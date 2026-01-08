@@ -7,6 +7,13 @@ repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+        sourceCompatibility = JavaVersion.VERSION_21
+    }
+}
+
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -17,7 +24,7 @@ test {
 }
 
 mavenPublishing {
-    coordinates('uk.co.jdunkerley', 'yxdb-java', '0.1.0')
+    coordinates('uk.co.jdunkerley', 'yxdb-java', '0.1.1')
 
     pom {
         name = "yxdb-java"
@@ -32,9 +39,9 @@ mavenPublishing {
         }
         developers {
             developer {
-                id = getProperty('user.id')
-                name = getProperty('user.name')
-                email = getProperty('user.email')
+                id = project.properties['user.id'] ?: '<user-id>'
+                name = project.properties['user.name'] ?: '<user-name>'
+                email = project.properties['user.email'] ?: '<user-email>'
             }
         }
         scm {

@@ -83,7 +83,7 @@ public class YxdbReader implements AutoCloseable {
         } catch (IOException | IllegalArgumentException ex) {
             try {
                 stream.close();
-            } catch (Exception _) {
+            } catch (Exception ignored) {
             }
 
             throw ex;

@@ -223,7 +223,7 @@ public class YxdbReaderTest {
 
     @Test
     public void TestInvalidFile() {
-        try (var _ = new YxdbReader("src/test/resources/invalid.txt")) {
+        try (var ignored = new YxdbReader("src/test/resources/invalid.txt")) {
             Assertions.fail("Expected exception not thrown");
         } catch (Exception ex) {
             var msg = ex.getMessage();
@@ -233,7 +233,7 @@ public class YxdbReaderTest {
 
     @Test
     public void TestSmallInvalidFile() {
-        try (var _ = new YxdbReader("src/test/resources/invalidSmall.txt")) {
+        try (var ignored = new YxdbReader("src/test/resources/invalidSmall.txt")) {
             Assertions.fail("Expected exception not thrown");
         } catch (Exception ex) {
             var msg = ex.getMessage();
@@ -243,7 +243,7 @@ public class YxdbReaderTest {
 
     @Test
     public void TestE2File() {
-        try (var _ = new YxdbReader("src/test/resources/ampdata.yxdb")) {
+        try (var ignored = new YxdbReader("src/test/resources/ampdata.yxdb")) {
             Assertions.fail("Expected exception not thrown");
         } catch (Exception ex) {
             var msg = ex.getMessage();
