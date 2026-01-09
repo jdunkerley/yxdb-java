@@ -26,3 +26,6 @@ jobs:
 
     - name: Build with Gradle Wrapper
       run: ./gradlew build
+
+    - name: Build JavaDoc
+      run: ./gradlew plainJavadocJar
