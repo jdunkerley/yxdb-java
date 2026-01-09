@@ -56,7 +56,13 @@ class BufferedRecordReader {
 
     private void readVariableRecord() throws IOException {
         read(fixedLen + 4);
-        var varLength = recordBuffer.getInt(recordBufferIndex - 4);
+
+        long variableLength = ((long) recordBuffer.getInt(recordBufferIndex - 4) & 0xffffffffL);
+        if (variableLength > Integer.MAX_VALUE - 4 - fixedLen) {
+            throw new IOException("Record length exceeds maximum supported size (2 GB).");
+        }
+
+        var varLength = (int) variableLength;
         if (fixedLen + 4 + varLength > recordBuffer.capacity()) {
             var newLength = (fixedLen + 4 + varLength) * 2;
             var newBuffer = ByteBuffer.allocate(newLength).order(ByteOrder.LITTLE_ENDIAN);

@@ -31,7 +31,12 @@ public final class Spatial {
         }
 
         if (value.length < 20) {
-            throw new IllegalArgumentException("bytes are not a spatial object");
+            for (var b : value) {
+                if (b != 0) {
+                    throw new IllegalArgumentException("bytes are not a spatial object");
+                }
+            }
+            return "";
         }
 
         var buffer = ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN);
