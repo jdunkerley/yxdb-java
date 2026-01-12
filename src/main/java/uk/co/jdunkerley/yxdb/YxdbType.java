@@ -4,6 +4,9 @@ package uk.co.jdunkerley.yxdb;
  * Constants for the Alteryx YXDB file format data types.
  */
 public final class YxdbType {
+    private YxdbType() {
+    }
+
     /** Alteryx YXDB type name for boolean fields. */
     public static final String BOOLEAN = "Bool";
 
