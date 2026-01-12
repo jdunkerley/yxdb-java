@@ -24,7 +24,7 @@ test {
 }
 
 mavenPublishing {
-    coordinates('uk.co.jdunkerley', 'yxdb-java', '0.1.3')
+    coordinates('uk.co.jdunkerley', 'yxdb-java', '0.1.4')
 
     pom {
         name = "yxdb-java"
