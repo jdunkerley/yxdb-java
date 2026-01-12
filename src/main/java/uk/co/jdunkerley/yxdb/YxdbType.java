@@ -3,24 +3,60 @@ package uk.co.jdunkerley.yxdb;
 /**
  * Constants for the Alteryx YXDB file format data types.
  */
-final class YxdbType {
-    static final String BOOLEAN = "Bool";
-    static final String BYTE = "Byte";
-    static final String INT16 = "Int16";
-    static final String INT32 = "Int32";
-    static final String INT64 = "Int64";
-    static final String FLOAT = "Float";
-    static final String DOUBLE = "Double";
-    static final String DECIMAL = "FixedDecimal";
-    static final String STRING = "String";
-    static final String V_STRING = "V_String";
-    static final String WSTRING = "WString";
-    static final String V_WSTRING = "V_WString";
-    static final String DATETIME = "DateTime";
-    static final String DATE = "Date";
-    static final String TIME = "Time";
-    static final String BLOB = "Blob";
-    static final String SPATIAL_OBJ = "SpatialObj";
+public final class YxdbType {
+    private YxdbType() {
+    }
+
+    /** Alteryx YXDB type name for boolean fields. */
+    public static final String BOOLEAN = "Bool";
+
+    /** Alteryx YXDB type name for byte fields. */
+    public static final String BYTE = "Byte";
+
+    /** Alteryx YXDB type name for 16-bit integer fields. */
+    public static final String INT16 = "Int16";
+
+    /** Alteryx YXDB type name for 32-bit integer fields. */
+    public static final String INT32 = "Int32";
+
+    /** Alteryx YXDB type name for 64-bit integer fields. */
+    public static final String INT64 = "Int64";
+
+    /** Alteryx YXDB type name for single-precision floating-point fields. */
+    public static final String FLOAT = "Float";
+
+    /** Alteryx YXDB type name for double-precision floating-point fields. */
+    public static final String DOUBLE = "Double";
+
+    /** Alteryx YXDB type name for fixed decimal fields (with a scale and precision). */
+    public static final String DECIMAL = "FixedDecimal";
+
+    /** Alteryx YXDB type name for maximum-length ISO-8859-1 string fields. */
+    public static final String STRING = "String";
+
+    /** Alteryx YXDB type name for variable-length ISO-8859-1 string fields. */
+    public static final String V_STRING = "V_String";
+
+    /** Alteryx YXDB type name for maximum-length UTF-16 string fields. */
+    public static final String WSTRING = "WString";
+
+    /** Alteryx YXDB type name for variable-length UTF-16 string fields. */
+    public static final String V_WSTRING = "V_WString";
+
+    /** Alteryx YXDB type name for local date time fields. */
+    public static final String DATETIME = "DateTime";
+
+    /** Alteryx YXDB type name for local date fields. */
+    public static final String DATE = "Date";
+
+    /** Alteryx YXDB type name for local time fields. */
+    public static final String TIME = "Time";
+
+    /** Alteryx YXDB type name for binary large object fields. */
+    public static final String BLOB = "Blob";
+
+    /** Alteryx YXDB type name for spatial object fields. */
+    public static final String SPATIAL_OBJ = "SpatialObj";
 
     static int sizeOf(YxdbField field) {
         var typeName = field.yxdbType();
